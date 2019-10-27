@@ -22,17 +22,24 @@ var width = canvas.width;
 
 // define card arena areas
 // player zone
-var playerField = canvas.height * (14/20);
-var playerHand = canvas.height * (19/20);
+var playerFieldY = canvas.height * (14/20);
+var playerHandY = canvas.height * (19/20);
 var playerDeck = 0;
 // enemy zone
-var enemyField = 0;
-var enemyHand = 0;
+var enemyFieldY = 0;
+var enemyHandY = 0;
 var enemyDeck = 0;
 
 window.addEventListener('resize', function() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  // reset zone locations
+  playerFieldY = canvas.height * (14/20);
+  playerHandY = canvas.height * (19/20);
+  playerDeck = 0;
+  enemyFieldY = 0;
+  enemyHandY = 0;
+  enemyDeck = 0;
 });
 window.addEventListener('orientationchange', function() {
   canvas.width = window.innerWidth;
@@ -204,15 +211,19 @@ var cursor = {
 
 // desktop mouse functions
 
-canvas.addEventListener('mousemove', function(event){
+canvas.addEventListener('mousemove', function(event) {
     cursor.x = event.offsetX;
     cursor.y = event.offsetY;
 });
 canvas.addEventListener('mousedown', function(event) {
   mouseDownIteration(arrayOfPlayerCards);
+  // if (currentGrabbedIndex === undefined) {
+  //   mouseDownIteration(playerHand);
+  // }
 });
 canvas.addEventListener('mouseup', function(event) {
   mouseUpIteration(arrayOfPlayerCards);
+  // mouseUpIteration(playerHand);
 });
 canvas.addEventListener('dblclick', function(event) {
   event.preventDefault();
@@ -252,6 +263,9 @@ function animate() {
     arrayOfPlayerCards[i].cardSprite.update();
   }
   for (let i = 0; i < playerHand.length; i++) {
+    // set player hand location correctly
+    playerHand[i].cardSprite.x = (canvas.width - playerHand[i].cardSprite.sprite.width)/2;
+    playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);// - (canvas.height * 1/20); // minus some padding
     playerHand[i].cardSprite.update();
   }
   testButton.buttonSprite.update();
