@@ -1,7 +1,13 @@
 /*
-drag effects
 end turn button
 tap effects
+
+current:
+  make player hand
+    cards can get dragged from hand to anywhere
+      if dropped within certain y window they will be 'played', otherwise returned to hand
+      if dropped onto enemy maybe they will also be 'played' if possible
+    cards in hand are arranged depending on how many
 */
 
 // define canvas
@@ -16,11 +22,11 @@ var width = canvas.width;
 
 // define card arena areas
 // player zone
-var playerRow = 0;
-var playerHand = 0;
+var playerField = canvas.height * (14/20);
+var playerHand = canvas.height * (19/20);
 var playerDeck = 0;
 // enemy zone
-var enemyRow = 0;
+var enemyField = 0;
 var enemyHand = 0;
 var enemyDeck = 0;
 
@@ -127,24 +133,54 @@ function Button(img, id) {
   };
 };
 
+function mouseDownIteration(array) {
+  for (let i = array.length-1; i >= 0; i--) {
+    if (cursor.x >= array[i].cardSprite.x && cursor.x <= array[i].cardSprite.x + array[i].cardSprite.sprite.width
+        && cursor.y >= array[i].cardSprite.y && cursor.y <= array[i].cardSprite.y + array[i].cardSprite.sprite.height) {
+        
+        array[i].cardSprite.grabbed = true;
+
+        // bug fix
+        array[i].cardSprite.x = cursor.x - array[i].cardSprite.sprite.width/2;
+        array[i].cardSprite.y = cursor.y - array[i].cardSprite.sprite.height/2;
+
+        // shift location of card to top layer of canvas rendering
+        var temporary = array[i];
+        array.splice(i,1);
+        array.push(temporary);
+
+        // store index of grabbed card
+        currentGrabbedIndex = array.length-1;
+       
+        break;
+      }
+  }
+};
+function mouseUpIteration(array) {
+  array[currentGrabbedIndex].cardSprite.grabbed = false;
+  // makes ungrabbed cards decrease in size toward middle rather than top left
+  array[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
+  array[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
+  // forget what's been grabbed
+  currentGrabbedIndex = undefined;
+}
+
+// arrays of cards
 var arrayOfPlayerCards = [];
+var playerHand = [];
+var playerField = [];
 var arrayOfOpponentCards = [];
+var enemyHand = [];
+var enemyField = [];
+
+// misc variables
 var arrayOfStatusEffectImages = [];
 var currentGrabbedIndex;
 var grabSizeMultiplier = 10/9;
 
-
-// $('#love-button').on('click', function(event) {
-//   event.preventDefault();
-//   heart.show = true;
-//   setTimeout(() => {
-//     heart.show = false
-//   }, 1500);
-// });
-
-
+// cursor attributes
 var cursor = {
-  // initialize random stats
+  
   x: 0,
   y: 0,
   w: 5,
@@ -173,35 +209,10 @@ canvas.addEventListener('mousemove', function(event){
     cursor.y = event.offsetY;
 });
 canvas.addEventListener('mousedown', function(event) {
-  for (let i = arrayOfPlayerCards.length-1; i >= 0; i--) {
-    if (cursor.x >= arrayOfPlayerCards[i].cardSprite.x && cursor.x <= arrayOfPlayerCards[i].cardSprite.x + arrayOfPlayerCards[i].cardSprite.sprite.width
-        && cursor.y >= arrayOfPlayerCards[i].cardSprite.y && cursor.y <= arrayOfPlayerCards[i].cardSprite.y + arrayOfPlayerCards[i].cardSprite.sprite.height) {
-        
-        arrayOfPlayerCards[i].cardSprite.grabbed = true;
-
-        // bug fix
-        arrayOfPlayerCards[i].cardSprite.x = cursor.x - arrayOfPlayerCards[i].cardSprite.sprite.width/2;
-        arrayOfPlayerCards[i].cardSprite.y = cursor.y - arrayOfPlayerCards[i].cardSprite.sprite.height/2;
-
-        // shift location of card to top layer of canvas rendering
-        var temporary = arrayOfPlayerCards[i];
-        arrayOfPlayerCards.splice(i,1);
-        arrayOfPlayerCards.push(temporary);
-
-        // store index of grabbed card
-        currentGrabbedIndex = arrayOfPlayerCards.length-1;
-       
-        break;
-      }
-  }
+  mouseDownIteration(arrayOfPlayerCards);
 });
 canvas.addEventListener('mouseup', function(event) {
-  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.grabbed = false;
-
-  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
-  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
-  // forget what's been grabbed
-  currentGrabbedIndex = undefined;
+  mouseUpIteration(arrayOfPlayerCards);
 });
 canvas.addEventListener('dblclick', function(event) {
   event.preventDefault();
@@ -214,34 +225,10 @@ canvas.addEventListener('touchmove', function(event){
   cursor.y = event.offsetY;
 });
 canvas.addEventListener('touchdown', function(event) {
-for (let i = arrayOfPlayerCards.length-1; i >= 0; i--) {
-  if (cursor.x >= arrayOfPlayerCards[i].cardSprite.x && cursor.x <= arrayOfPlayerCards[i].cardSprite.x + arrayOfPlayerCards[i].cardSprite.sprite.width
-      && cursor.y >= arrayOfPlayerCards[i].cardSprite.y && cursor.y <= arrayOfPlayerCards[i].cardSprite.y + arrayOfPlayerCards[i].cardSprite.sprite.height) {
-      
-      arrayOfPlayerCards[i].cardSprite.grabbed = true;
-        
-        // bug fix
-        arrayOfPlayerCards[i].cardSprite.x = cursor.x - arrayOfPlayerCards[i].cardSprite.sprite.width/2;
-        arrayOfPlayerCards[i].cardSprite.y = cursor.y - arrayOfPlayerCards[i].cardSprite.sprite.height/2;
-
-        // shift location of card to top layer of canvas rendering
-        var temporary = arrayOfPlayerCards[i];
-        arrayOfPlayerCards.splice(i,1);
-        arrayOfPlayerCards.push(temporary);
-
-        // store index of grabbed card
-        currentGrabbedIndex = arrayOfPlayerCards.length-1;
-
-      break;
-    }
-}
+  mouseDownIteration(arrayOfPlayerCards);
 });
 canvas.addEventListener('touchup', function(event) {
-  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.grabbed = false;
-
-  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
-  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
-  currentGrabbedIndex = undefined;
+  mouseUpIteration(arrayOfPlayerCards);
 });
 
 
@@ -251,6 +238,9 @@ arrayOfPlayerCards.push(new Card(1,1,0,0));
 arrayOfPlayerCards.push(new Card(2,2,0,0));
 arrayOfPlayerCards.push(new Card(3,3,0,0));
 arrayOfPlayerCards.push(new Card(4,4,0,0));
+
+playerHand.push(new Card(0,0,0,0))
+
 var testButton = new Button(0,0);
 
 function animate() {
@@ -261,8 +251,48 @@ function animate() {
   for (let i = 0; i < arrayOfPlayerCards.length; i++) {
     arrayOfPlayerCards[i].cardSprite.update();
   }
+  for (let i = 0; i < playerHand.length; i++) {
+    playerHand[i].cardSprite.update();
+  }
   testButton.buttonSprite.update();
-  cursor.update();
+  // cursor.update();
 }
 
 animate();
+
+//
+// recycling bin
+//
+
+
+// mouse down
+// for (let i = arrayOfPlayerCards.length-1; i >= 0; i--) {
+  //   if (cursor.x >= arrayOfPlayerCards[i].cardSprite.x && cursor.x <= arrayOfPlayerCards[i].cardSprite.x + arrayOfPlayerCards[i].cardSprite.sprite.width
+  //       && cursor.y >= arrayOfPlayerCards[i].cardSprite.y && cursor.y <= arrayOfPlayerCards[i].cardSprite.y + arrayOfPlayerCards[i].cardSprite.sprite.height) {
+        
+  //       arrayOfPlayerCards[i].cardSprite.grabbed = true;
+
+  //       // bug fix
+  //       arrayOfPlayerCards[i].cardSprite.x = cursor.x - arrayOfPlayerCards[i].cardSprite.sprite.width/2;
+  //       arrayOfPlayerCards[i].cardSprite.y = cursor.y - arrayOfPlayerCards[i].cardSprite.sprite.height/2;
+
+  //       // shift location of card to top layer of canvas rendering
+  //       var temporary = arrayOfPlayerCards[i];
+  //       arrayOfPlayerCards.splice(i,1);
+  //       arrayOfPlayerCards.push(temporary);
+
+  //       // store index of grabbed card
+  //       currentGrabbedIndex = arrayOfPlayerCards.length-1;
+       
+  //       break;
+  //     }
+  // }
+
+
+  // mouse up
+  // arrayOfPlayerCards[currentGrabbedIndex].cardSprite.grabbed = false;
+  // // makes ungrabbed cards decrease in size toward middle rather than top left
+  // arrayOfPlayerCards[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
+  // arrayOfPlayerCards[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
+  // // forget what's been grabbed
+  // currentGrabbedIndex = undefined;
