@@ -197,10 +197,16 @@ canvas.addEventListener('mousedown', function(event) {
 });
 canvas.addEventListener('mouseup', function(event) {
   arrayOfPlayerCards[currentGrabbedIndex].cardSprite.grabbed = false;
+
+  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
+  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
   // forget what's been grabbed
   currentGrabbedIndex = undefined;
 });
-
+canvas.addEventListener('dblclick', function(event) {
+  event.preventDefault();
+  console.log('worked');
+});
 
 // mobile touch functions
 canvas.addEventListener('touchmove', function(event){
@@ -232,6 +238,9 @@ for (let i = arrayOfPlayerCards.length-1; i >= 0; i--) {
 });
 canvas.addEventListener('touchup', function(event) {
   arrayOfPlayerCards[currentGrabbedIndex].cardSprite.grabbed = false;
+
+  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
+  arrayOfPlayerCards[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
   currentGrabbedIndex = undefined;
 });
 
