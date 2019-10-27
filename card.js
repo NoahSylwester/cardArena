@@ -134,50 +134,6 @@ var currentGrabbedIndex;
 var grabSizeMultiplier = 10/9;
 
 
-
-
-// define pet sprite
-// var cardSprite = {
-//   // initialize random stats
-//   x: 0,
-//   y: 0,
-//   dx: 0,
-//   dy: 0,
-
-//   sprite: {
-//     img: document.querySelector('#card'),
-//     width: 200,
-//     height: this.width * (2000/1422)
-//   },
-
-//   draw: function() {
-//     // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
-//     c.drawImage(this.sprite.img, 100, 200, this.sprite.width, this.sprite.height);
-//   },
-  
-//   update: function() {
-
-//     this.draw();
-//   }
-// };
-
-// $('#feed-button').on('click', function(event) {
-//   event.preventDefault();
-//   if (steaks > 0 && meat.exists === false) {
-
-//     meat.exists = true;
-//     meat.x = Math.random() * (canvas.width - 100);
-//     meat.y = 0;
-//     meat.dy = 0;
-//     petArr[currentPet].feed(cookie.foodValue);
-//     steaks --;
-//     if (steaks === 0 || steaks < 0) {
-//       steaks = 0;
-//     }
-//     $("#feedBadge").html(steaks);
-//   };
-// });
-
 // $('#love-button').on('click', function(event) {
 //   event.preventDefault();
 //   heart.show = true;
@@ -210,18 +166,6 @@ var cursor = {
   }
 };
 
-// canvas.addEventListener('click', function(event){
-//   event.preventDefault();
-//   for (let i = 0; i < arrayOfPlayerCards.length; i++) {
-//     if (cursor.x >= arrayOfPlayerCards[i].cardSprite.x && cursor.x <= arrayOfPlayerCards[i].cardSprite.x + arrayOfPlayerCards[i].cardSprite.sprite.width
-//         && cursor.y >= arrayOfPlayerCards[i].cardSprite.y && cursor.y <= arrayOfPlayerCards[i].cardSprite.y + arrayOfPlayerCards[i].cardSprite.sprite.height) {
-        
-//         arrayOfPlayerCards[i].cardSprite.x = 200;
-//         arrayOfPlayerCards[i].cardSprite.y = 200;
-//         break;
-//       }
-//   }
-// });
 // desktop mouse functions
 
 canvas.addEventListener('mousemove', function(event){
