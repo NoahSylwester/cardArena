@@ -69,7 +69,7 @@ function Card(img, atk, def, ability) {
   this.def = def;
   this.ability = ability;
   this.cardSprite = {
-    // initialize random stats
+    // initialize position
     x: 0,
     y: 0,
     dx: 0,
@@ -77,12 +77,13 @@ function Card(img, atk, def, ability) {
     grabbed: false,
 
     sprite: {
-      img: document.querySelector('#card'), // or img?
+      img: document.querySelector('#card'), // or img parameter
       width: width/10,
       height: (width/10) * (2000/1422)
     },
   
     draw: function(radians) {
+      // check if rotated and not grabbed, rotate if so
       if (radians !== undefined && this.grabbed === false) {
         c.translate(this.x+this.sprite.width/2,this.y+this.sprite.height/2);
         c.rotate(radians);
@@ -119,6 +120,7 @@ function Card(img, atk, def, ability) {
         this.x = cursor.x - this.sprite.width/2;
         this.y = cursor.y - this.sprite.height/2;
       }
+      // check if rotated
       if (radians !== undefined) {
         this.draw(radians);
       }
@@ -202,6 +204,12 @@ function mouseUpIteration(array) {
     // makes ungrabbed cards decrease in size toward middle rather than top left
     array[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
     array[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
+    // check if playing cards from hand
+    if (array === playerHand && array[currentGrabbedIndex].cardSprite.y < playerFieldY && array[currentGrabbedIndex].cardSprite.y >= playerFieldY*7/10) {
+      var temp = array[currentGrabbedIndex];
+      array.splice(currentGrabbedIndex,1);
+      playerField.push(temp);
+    }
     // forget what's been grabbed
     currentGrabbedIndex = undefined;
   }
@@ -258,7 +266,6 @@ canvas.addEventListener('mousedown', function(event) {
 });
 canvas.addEventListener('mouseup', function(event) {
   mouseUpIteration(arrayOfPlayerCards);
-  console.log('fired');
   mouseUpIteration(playerHand);
 });
 canvas.addEventListener('dblclick', function(event) {
@@ -305,6 +312,9 @@ function animate() {
   requestAnimationFrame(animate);
 
   c.clearRect(0, 0, innerWidth, 2 * innerHeight);
+  for (let i = 0; i < playerField.length; i++) {
+    playerField[i].cardSprite.update();
+  }
   for (let i = 0; i < arrayOfPlayerCards.length; i++) {
     arrayOfPlayerCards[i].cardSprite.update();
   }
