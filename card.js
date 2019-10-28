@@ -18,17 +18,20 @@ var c = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+const cardFront = document.querySelector('#card-front');
+const cardBack = document.querySelector('#card-back');
+
 var width = canvas.width;
 
 // define card arena areas
 // player zone
 var playerFieldY = canvas.height * (14/20);
 var playerHandY = canvas.height * (19/20);
-var playerDeck = 0;
+var playerDeckX = canvas.width * (19/20);
 // enemy zone
 var enemyFieldY = 0;
 var enemyHandY = 0;
-var enemyDeck = 0;
+var enemyDeckX = 0;
 
 window.addEventListener('resize', function() {
   canvas.width = window.innerWidth;
@@ -36,10 +39,10 @@ window.addEventListener('resize', function() {
   // reset zone locations
   playerFieldY = canvas.height * (14/20);
   playerHandY = canvas.height * (19/20);
-  playerDeck = 0;
+  playerDeckX = canvas.width * (19/20);
   enemyFieldY = 0;
   enemyHandY = 0;
-  enemyDeck = 0;
+  enemyDeckX = 0;
 });
 window.addEventListener('orientationchange', function() {
   canvas.width = window.innerWidth;
@@ -47,10 +50,10 @@ window.addEventListener('orientationchange', function() {
   // reset zone locations
   playerFieldY = canvas.height * (14/20);
   playerHandY = canvas.height * (19/20);
-  playerDeck = 0;
+  playerDeckX = 0;
   enemyFieldY = 0;
   enemyHandY = 0;
-  enemyDeck = 0;
+  enemyDeckX = 0;
 });
 
 // start of card arena code
@@ -77,7 +80,7 @@ function Card(img, atk, def, ability) {
     grabbed: false,
 
     sprite: {
-      img: document.querySelector('#card'), // or img parameter
+      img: img,
       width: width/10,
       height: (width/10) * (2000/1422)
     },
@@ -170,6 +173,14 @@ this.x = (width - this.sprite.width)/2;
   };
 };
 
+function clickDeck(array) {
+  if (cursor.x >= array[array.length-1].cardSprite.x && cursor.x <= array[array.length-1].cardSprite.x + array[array.length-1].cardSprite.sprite.width
+    && cursor.y >= array[array.length-1].cardSprite.y && cursor.y <= array[array.length-1].cardSprite.y + array[array.length-1].cardSprite.sprite.height) {
+      // draw card into hand
+      playerHand.push(array.pop());
+    }
+}
+
 function mouseDownIteration(array) {
   for (let i = array.length-1; i >= 0; i--) {
     if (cursor.x >= array[i].cardSprite.x && cursor.x <= array[i].cardSprite.x + array[i].cardSprite.sprite.width
@@ -205,7 +216,7 @@ function mouseUpIteration(array) {
     array[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
     array[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
     // check if playing cards from hand
-    if (array === playerHand && array[currentGrabbedIndex].cardSprite.y < playerFieldY && array[currentGrabbedIndex].cardSprite.y >= playerFieldY*7/10) {
+    if (array === playerHand && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= playerFieldY*7/10) {
       var temp = array[currentGrabbedIndex];
       array.splice(currentGrabbedIndex,1);
       playerField.push(temp);
@@ -219,9 +230,11 @@ function mouseUpIteration(array) {
 var arrayOfPlayerCards = [];
 var playerHand = [];
 var playerField = [];
+var playerDeck = [];
 var arrayOfOpponentCards = [];
 var enemyHand = [];
 var enemyField = [];
+var enemyDeck = [];
 
 // misc variables
 var arrayOfStatusEffectImages = [];
@@ -253,10 +266,12 @@ var cursor = {
 };
 
 // desktop mouse functions
-
 canvas.addEventListener('mousemove', function(event) {
     cursor.x = event.offsetX;
     cursor.y = event.offsetY;
+});
+canvas.addEventListener('click', function(event) {
+  clickDeck(playerDeck);
 });
 canvas.addEventListener('mousedown', function(event) {
   mouseDownIteration(arrayOfPlayerCards);
@@ -290,19 +305,36 @@ canvas.addEventListener('touchup', function(event) {
 
 
 // create some cards
-arrayOfPlayerCards.push(new Card(0,0,0,0));
-arrayOfPlayerCards.push(new Card(1,1,0,0));
-arrayOfPlayerCards.push(new Card(2,2,0,0));
-arrayOfPlayerCards.push(new Card(3,3,0,0));
-arrayOfPlayerCards.push(new Card(4,4,0,0));
+arrayOfPlayerCards.push(new Card(cardFront,0,0,0));
+arrayOfPlayerCards.push(new Card(cardFront,1,0,0));
+arrayOfPlayerCards.push(new Card(cardFront,2,0,0));
+arrayOfPlayerCards.push(new Card(cardFront,3,0,0));
+arrayOfPlayerCards.push(new Card(cardFront,4,0,0));
 
-playerHand.push(new Card(0,0,0,0));
-playerHand.push(new Card(0,0,0,0));
-playerHand.push(new Card(0,0,0,0));
-playerHand.push(new Card(0,0,0,0));
-playerHand.push(new Card(0,0,0,0));
-playerHand.push(new Card(0,0,0,0));
-playerHand.push(new Card(0,0,0,0));
+playerHand.push(new Card(cardFront,0,0,0));
+playerHand.push(new Card(cardFront,0,0,0));
+playerHand.push(new Card(cardFront,0,0,0));
+playerHand.push(new Card(cardFront,0,0,0));
+playerHand.push(new Card(cardFront,0,0,0));
+playerHand.push(new Card(cardFront,0,0,0));
+playerHand.push(new Card(cardFront,0,0,0));
+
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+
 
 
 var testButton = new Button(0,0);
@@ -312,6 +344,7 @@ function animate() {
   requestAnimationFrame(animate);
 
   c.clearRect(0, 0, innerWidth, 2 * innerHeight);
+
   for (let i = 0; i < playerField.length; i++) {
     playerField[i].cardSprite.update();
   }
@@ -327,6 +360,11 @@ function animate() {
     // playerHand[i].cardSprite.x = (canvas.width - playerHand[i].cardSprite.sprite.width)/2;
     playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);
     playerHand[i].cardSprite.update(radians);
+  }
+  for (let i = 0; i < playerDeck.length; i++) {
+    playerDeck[i].cardSprite.x = playerDeckX - canvas.width/10;
+    playerDeck[i].cardSprite.y = playerHandY - playerDeck[i].cardSprite.sprite.height - i; // thicken deck with more cards
+    playerDeck[i].cardSprite.update();
   }
   testButton.buttonSprite.update();
   // cursor.update();
