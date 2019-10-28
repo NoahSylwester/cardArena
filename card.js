@@ -75,12 +75,21 @@ function Card(img, atk, def, ability) {
       height: (width/10) * (2000/1422)
     },
   
-    draw: function() {
-      // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
-      c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+    draw: function(radians) {
+      if (radians !== undefined) {
+        c.translate(this.x+this.sprite.width/2,this.y+this.sprite.height/2);
+        c.rotate(radians);
+        c.drawImage(this.sprite.img, -this.sprite.width/2, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12, this.sprite.width, this.sprite.height);            
+        c.rotate(-radians);
+        c.translate(-(this.x+this.sprite.width/2), -(this.y+this.sprite.height/2));
+      }
+      else {
+        // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
+        c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+      }
     },
     
-    update: function() {
+    update: function(radians) {
       let width = canvas.width;
       
       // increase size if grabbed
@@ -98,8 +107,12 @@ function Card(img, atk, def, ability) {
         this.x = cursor.x - this.sprite.width/2;
         this.y = cursor.y - this.sprite.height/2;
       }
-
-      this.draw();
+      if (radians !== undefined) {
+        this.draw(radians);
+      }
+      else {
+        this.draw();
+      }
     }
   };
 };
@@ -129,7 +142,10 @@ function Button(img, id) {
       let width = canvas.width;
       this.sprite.width = width/20;
       this.sprite.height = (width/20) * (1/2);
-      
+
+//test for centering on canvas
+this.x = (width - this.sprite.width)/2;
+//end
       if (this.pushed) {
         this.x = cursor.x - this.sprite.width/2;
         this.y = cursor.y - this.sprite.height/2;
@@ -217,13 +233,13 @@ canvas.addEventListener('mousemove', function(event) {
 });
 canvas.addEventListener('mousedown', function(event) {
   mouseDownIteration(arrayOfPlayerCards);
-  // if (currentGrabbedIndex === undefined) {
-  //   mouseDownIteration(playerHand);
-  // }
+  if (currentGrabbedIndex === undefined) {
+    mouseDownIteration(playerHand);
+  }
 });
 canvas.addEventListener('mouseup', function(event) {
   mouseUpIteration(arrayOfPlayerCards);
-  // mouseUpIteration(playerHand);
+  mouseUpIteration(playerHand);
 });
 canvas.addEventListener('dblclick', function(event) {
   event.preventDefault();
@@ -250,7 +266,14 @@ arrayOfPlayerCards.push(new Card(2,2,0,0));
 arrayOfPlayerCards.push(new Card(3,3,0,0));
 arrayOfPlayerCards.push(new Card(4,4,0,0));
 
-playerHand.push(new Card(0,0,0,0))
+playerHand.push(new Card(0,0,0,0));
+playerHand.push(new Card(0,0,0,0));
+playerHand.push(new Card(0,0,0,0));
+playerHand.push(new Card(0,0,0,0));
+playerHand.push(new Card(0,0,0,0));
+playerHand.push(new Card(0,0,0,0));
+playerHand.push(new Card(0,0,0,0));
+
 
 var testButton = new Button(0,0);
 
@@ -264,9 +287,14 @@ function animate() {
   }
   for (let i = 0; i < playerHand.length; i++) {
     // set player hand location correctly
-    playerHand[i].cardSprite.x = (canvas.width - playerHand[i].cardSprite.sprite.width)/2;
-    playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);// - (canvas.height * 1/20); // minus some padding
-    playerHand[i].cardSprite.update();
+    // create relative card positions in hand
+    playerHand[i].cardSprite.x = ((canvas.width - (playerHand[i].cardSprite.sprite.width * (playerHand.length/2))) + (playerHand[i].cardSprite.sprite.width * i))/2 - playerHand[i].cardSprite.sprite.width/4;
+    let arcAngle = Math.PI/3
+    let radians = ((arcAngle) * (i + 0.5)/playerHand.length)-(arcAngle/2);
+    // playerHand[i].cardSprite.x = (canvas.width - playerHand[i].cardSprite.sprite.width)/2;
+    playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);
+    playerHand[i].cardSprite.update(radians);
+    console.log(playerHand[i].cardSprite.x);
   }
   testButton.buttonSprite.update();
   // cursor.update();
