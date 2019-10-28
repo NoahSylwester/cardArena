@@ -33,6 +33,9 @@ var enemyFieldY = 0;
 var enemyHandY = 0;
 var enemyDeckX = 0;
 
+// max hand size
+const maxHandSize = 7;
+
 window.addEventListener('resize', function() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -94,10 +97,6 @@ function Card(img, atk, def, ability) {
         c.rotate(-radians);
         c.translate(-(this.x+this.sprite.width/2), -(this.y+this.sprite.height/2));
         
-        // testing marker
-        c.beginPath();
-        c.rect(this.x, this.y, 5, 5);
-        c.stroke();
       }
       else {
         // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
@@ -176,7 +175,8 @@ this.x = (width - this.sprite.width)/2;
 function clickDeck(array) {
   if (cursor.x >= array[array.length-1].cardSprite.x && cursor.x <= array[array.length-1].cardSprite.x + array[array.length-1].cardSprite.sprite.width
     && cursor.y >= array[array.length-1].cardSprite.y && cursor.y <= array[array.length-1].cardSprite.y + array[array.length-1].cardSprite.sprite.height) {
-      // draw card into hand
+      // draw card into hand, render as face-up
+      array[array.length-1].cardSprite.sprite.img = cardFront;
       playerHand.push(array.pop());
     }
 }
