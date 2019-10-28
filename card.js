@@ -44,6 +44,13 @@ window.addEventListener('resize', function() {
 window.addEventListener('orientationchange', function() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  // reset zone locations
+  playerFieldY = canvas.height * (14/20);
+  playerHandY = canvas.height * (19/20);
+  playerDeck = 0;
+  enemyFieldY = 0;
+  enemyHandY = 0;
+  enemyDeck = 0;
 });
 
 // start of card arena code
@@ -76,12 +83,17 @@ function Card(img, atk, def, ability) {
     },
   
     draw: function(radians) {
-      if (radians !== undefined) {
+      if (radians !== undefined && this.grabbed === false) {
         c.translate(this.x+this.sprite.width/2,this.y+this.sprite.height/2);
         c.rotate(radians);
         c.drawImage(this.sprite.img, -this.sprite.width/2, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12, this.sprite.width, this.sprite.height);            
         c.rotate(-radians);
         c.translate(-(this.x+this.sprite.width/2), -(this.y+this.sprite.height/2));
+        
+        // testing marker
+        c.beginPath();
+        c.rect(this.x, this.y, 5, 5);
+        c.stroke();
       }
       else {
         // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
@@ -168,25 +180,32 @@ function mouseDownIteration(array) {
         array[i].cardSprite.y = cursor.y - array[i].cardSprite.sprite.height/2;
 
         // shift location of card to top layer of canvas rendering
-        var temporary = array[i];
-        array.splice(i,1);
-        array.push(temporary);
+        if (array !== playerHand) {
+          var temporary = array[i];
+          array.splice(i,1);
+          array.push(temporary);
 
-        // store index of grabbed card
+          // store index of grabbed card
         currentGrabbedIndex = array.length-1;
-       
+        }
+        else {
+          currentGrabbedIndex = i;
+        }
+
         break;
       }
   }
 };
 function mouseUpIteration(array) {
-  array[currentGrabbedIndex].cardSprite.grabbed = false;
-  // makes ungrabbed cards decrease in size toward middle rather than top left
-  array[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
-  array[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
-  // forget what's been grabbed
-  currentGrabbedIndex = undefined;
-}
+  if (array[currentGrabbedIndex] !== undefined && array[currentGrabbedIndex].cardSprite.grabbed === true){
+    array[currentGrabbedIndex].cardSprite.grabbed = false;
+    // makes ungrabbed cards decrease in size toward middle rather than top left
+    array[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
+    array[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
+    // forget what's been grabbed
+    currentGrabbedIndex = undefined;
+  }
+};
 
 // arrays of cards
 var arrayOfPlayerCards = [];
@@ -239,11 +258,11 @@ canvas.addEventListener('mousedown', function(event) {
 });
 canvas.addEventListener('mouseup', function(event) {
   mouseUpIteration(arrayOfPlayerCards);
+  console.log('fired');
   mouseUpIteration(playerHand);
 });
 canvas.addEventListener('dblclick', function(event) {
   event.preventDefault();
-  console.log('worked');
 });
 
 // mobile touch functions
@@ -253,9 +272,13 @@ canvas.addEventListener('touchmove', function(event){
 });
 canvas.addEventListener('touchdown', function(event) {
   mouseDownIteration(arrayOfPlayerCards);
+  if (currentGrabbedIndex === undefined) {
+    mouseDownIteration(playerHand);
+  }
 });
 canvas.addEventListener('touchup', function(event) {
   mouseUpIteration(arrayOfPlayerCards);
+  mouseUpIteration(playerHand);
 });
 
 
@@ -294,7 +317,6 @@ function animate() {
     // playerHand[i].cardSprite.x = (canvas.width - playerHand[i].cardSprite.sprite.width)/2;
     playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);
     playerHand[i].cardSprite.update(radians);
-    console.log(playerHand[i].cardSprite.x);
   }
   testButton.buttonSprite.update();
   // cursor.update();
