@@ -133,12 +133,12 @@ function Card(img, atk, def, ability) {
   };
 };
 
-function Button(img, id) {
+function Button(img, id, x, y) {
   
   this.buttonSprite = {
     // initialize random stats
-    x: 500,
-    y: 500,
+    x: x,
+    y: y,
     dx: 0,
     dy: 0,
     pushed: false,
@@ -160,7 +160,7 @@ function Button(img, id) {
       this.sprite.height = (width/20) * (1/2);
 
 //test for centering on canvas
-this.x = (width - this.sprite.width)/2;
+// this.x = (width - this.sprite.width)/2;
 //end
       if (this.pushed) {
         this.x = cursor.x - this.sprite.width/2;
@@ -175,9 +175,12 @@ this.x = (width - this.sprite.width)/2;
 function clickDeck(array) {
   if (cursor.x >= array[array.length-1].cardSprite.x && cursor.x <= array[array.length-1].cardSprite.x + array[array.length-1].cardSprite.sprite.width
     && cursor.y >= array[array.length-1].cardSprite.y && cursor.y <= array[array.length-1].cardSprite.y + array[array.length-1].cardSprite.sprite.height) {
-      // draw card into hand, render as face-up
-      array[array.length-1].cardSprite.sprite.img = cardFront;
-      playerHand.push(array.pop());
+      // check hand size against max
+      if (playerHand.length < maxHandSize) {
+        // draw card into hand, render as face-up
+        array[array.length-1].cardSprite.sprite.img = cardFront;
+        playerHand.push(array.pop());
+      }
     }
 }
 
@@ -362,7 +365,9 @@ enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 
-var testButton = new Button(0,0);
+var endButton = new Button(0,0, canvas.width*3/4, canvas.height/2);
+var attackButton = new Button(0,0, canvas.width*3/4, canvas.height/2 - 50);
+var abilityButton = new Button(0,0, canvas.width*3/4, canvas.height/2 + 50);
 
 function animate() {
   
@@ -407,7 +412,9 @@ function animate() {
     playerDeck[i].cardSprite.y = playerHandY - playerDeck[i].cardSprite.sprite.height - i; // thicken deck with more cards
     playerDeck[i].cardSprite.update();
   }
-  testButton.buttonSprite.update();
+  endButton.buttonSprite.update();
+  attackButton.buttonSprite.update();
+  abilityButton.buttonSprite.update();
   // cursor.update();
 }
 
