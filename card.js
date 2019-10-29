@@ -35,6 +35,8 @@ var enemyDeckX = canvas.width * (1/20);
 
 // max hand size
 const maxHandSize = 7;
+// hand fan angle
+const handArcAngle = Math.PI/3;
 
 window.addEventListener('resize', function() {
   canvas.width = window.innerWidth;
@@ -145,7 +147,7 @@ function Button(img, id, x, y) {
 
     sprite: {
       img: cardBack, // or img?
-      width: width/20,
+      width: width/10,
       height: (width/20) * (1/2)
     },
   
@@ -156,12 +158,11 @@ function Button(img, id, x, y) {
     
     update: function() {
       let width = canvas.width;
-      this.sprite.width = width/20;
-      this.sprite.height = (width/20) * (1/2);
+      this.sprite.width = width/10;
+      this.sprite.height = (width/10) * (1/2);
 
-//test for centering on canvas
-// this.x = (width - this.sprite.width)/2;
-//end
+      this.x = width*17/20;
+
       if (this.pushed) {
         this.x = cursor.x - this.sprite.width/2;
         this.y = cursor.y - this.sprite.height/2;
@@ -379,6 +380,17 @@ function animate() {
   for (let i = 0; i < enemyField.length; i++) {
     enemyField[i].cardSprite.update();
   }
+  for (let i = 0; i < enemyHand.length; i++) {
+    // flip cards
+    enemyHand[i].cardSprite.sprite.img = cardBack;
+    // set enemy hand location correctly
+    // create relative card positions in hand
+    enemyHand[i].cardSprite.x = ((canvas.width - (enemyHand[i].cardSprite.sprite.width * (enemyHand.length/2))) + (enemyHand[i].cardSprite.sprite.width * i))/2 - enemyHand[i].cardSprite.sprite.width/4;
+    let radians = (((handArcAngle) * (i + 0.5)/enemyHand.length)-(handArcAngle/2));
+    // enemyHand[i].cardSprite.x = (canvas.width - enemyHand[i].cardSprite.sprite.width)/2;
+    enemyHand[i].cardSprite.y = enemyHandY/10;// - enemyHand[i].cardSprite.sprite.height;
+    enemyHand[i].cardSprite.update(radians);
+  }
   for (let i = 0; i < enemyDeck.length; i++) {
     enemyDeck[i].cardSprite.x = enemyDeckX;
     enemyDeck[i].cardSprite.y = enemyHandY - i;
@@ -400,8 +412,7 @@ function animate() {
     // set player hand location correctly
     // create relative card positions in hand
     playerHand[i].cardSprite.x = ((canvas.width - (playerHand[i].cardSprite.sprite.width * (playerHand.length/2))) + (playerHand[i].cardSprite.sprite.width * i))/2 - playerHand[i].cardSprite.sprite.width/4;
-    let arcAngle = Math.PI/3
-    let radians = ((arcAngle) * (i + 0.5)/playerHand.length)-(arcAngle/2);
+    let radians = ((handArcAngle) * (i + 0.5)/playerHand.length)-(handArcAngle/2);
     // playerHand[i].cardSprite.x = (canvas.width - playerHand[i].cardSprite.sprite.width)/2;
     playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);
     playerHand[i].cardSprite.update(radians);
