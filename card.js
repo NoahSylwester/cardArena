@@ -345,12 +345,15 @@ function animate() {
 
   c.clearRect(0, 0, innerWidth, 2 * innerHeight);
 
+  // animate player field
   for (let i = 0; i < playerField.length; i++) {
     playerField[i].cardSprite.update();
   }
+  // animate array of player cards
   for (let i = 0; i < arrayOfPlayerCards.length; i++) {
     arrayOfPlayerCards[i].cardSprite.update();
   }
+  // animate hand
   for (let i = 0; i < playerHand.length; i++) {
     // set player hand location correctly
     // create relative card positions in hand
@@ -361,6 +364,7 @@ function animate() {
     playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);
     playerHand[i].cardSprite.update(radians);
   }
+  // animate player deck
   for (let i = 0; i < playerDeck.length; i++) {
     playerDeck[i].cardSprite.x = playerDeckX - canvas.width/10;
     playerDeck[i].cardSprite.y = playerHandY - playerDeck[i].cardSprite.sprite.height - i; // thicken deck with more cards
