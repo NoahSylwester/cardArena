@@ -29,9 +29,9 @@ var playerFieldY = canvas.height * (14/20);
 var playerHandY = canvas.height * (19/20);
 var playerDeckX = canvas.width * (19/20);
 // enemy zone
-var enemyFieldY = 0;
-var enemyHandY = 0;
-var enemyDeckX = 0;
+var enemyFieldY = canvas.height * (6/20);
+var enemyHandY = canvas.height * (1/20);
+var enemyDeckX = canvas.width * (1/20);
 
 // max hand size
 const maxHandSize = 7;
@@ -43,9 +43,9 @@ window.addEventListener('resize', function() {
   playerFieldY = canvas.height * (14/20);
   playerHandY = canvas.height * (19/20);
   playerDeckX = canvas.width * (19/20);
-  enemyFieldY = 0;
-  enemyHandY = 0;
-  enemyDeckX = 0;
+  enemyFieldY = canvas.height * (6/20);
+  enemyHandY = canvas.height * (1/20);
+  enemyDeckX = canvas.width * (1/20);
 });
 window.addEventListener('orientationchange', function() {
   canvas.width = window.innerWidth;
@@ -319,6 +319,14 @@ playerHand.push(new Card(cardFront,0,0,0));
 playerHand.push(new Card(cardFront,0,0,0));
 playerHand.push(new Card(cardFront,0,0,0));
 
+enemyHand.push(new Card(cardFront,0,0,0));
+enemyHand.push(new Card(cardFront,0,0,0));
+enemyHand.push(new Card(cardFront,0,0,0));
+enemyHand.push(new Card(cardFront,0,0,0));
+enemyHand.push(new Card(cardFront,0,0,0));
+enemyHand.push(new Card(cardFront,0,0,0));
+enemyHand.push(new Card(cardFront,0,0,0));
+
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
@@ -335,7 +343,16 @@ playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 
-
+enemyDeck.push(new Card(cardBack,0,0,0));
+enemyDeck.push(new Card(cardBack,0,0,0));
+enemyDeck.push(new Card(cardBack,0,0,0));
+enemyDeck.push(new Card(cardBack,0,0,0));
+enemyDeck.push(new Card(cardBack,0,0,0));
+enemyDeck.push(new Card(cardBack,0,0,0));
+enemyDeck.push(new Card(cardBack,0,0,0));
+enemyDeck.push(new Card(cardBack,0,0,0));
+enemyDeck.push(new Card(cardBack,0,0,0));
+enemyDeck.push(new Card(cardBack,0,0,0));
 
 var testButton = new Button(0,0);
 
@@ -345,14 +362,26 @@ function animate() {
 
   c.clearRect(0, 0, innerWidth, 2 * innerHeight);
 
+  // render enemy cards
+  for (let i = 0; i < enemyField.length; i++) {
+    enemyField[i].cardSprite.update();
+  }
+  for (let i = 0; i < enemyDeck.length; i++) {
+    enemyDeck[i].cardSprite.x = enemyDeckX;
+    enemyDeck[i].cardSprite.y = enemyHandY - i;
+    enemyDeck[i].cardSprite.update();
+  }
+
   // animate player field
   for (let i = 0; i < playerField.length; i++) {
     playerField[i].cardSprite.update();
   }
-  // animate array of player cards
-  for (let i = 0; i < arrayOfPlayerCards.length; i++) {
-    arrayOfPlayerCards[i].cardSprite.update();
-  }
+        // tester cards
+        // // animate array of player cards
+        // for (let i = 0; i < arrayOfPlayerCards.length; i++) {
+        //   arrayOfPlayerCards[i].cardSprite.update();
+        // }
+
   // animate hand
   for (let i = 0; i < playerHand.length; i++) {
     // set player hand location correctly
