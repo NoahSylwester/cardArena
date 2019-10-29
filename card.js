@@ -54,8 +54,13 @@ const handArcAngle = Math.PI/3;
 window.addEventListener('resize', function() {
   // reset field cards positions proportional to last position/window before resetting widths
   for (let i = 0; i < playerField.length; i++) {
-    playerField[i].cardSprite.x = (playerField[i].cardSprite.x/canvas.width) * this.window.innerWidth;
-    playerField[i].cardSprite.y = (playerField[i].cardSprite.y/canvas.height) * this.window.innerHeight;
+    // not quite right here.. still movement downward and left
+    if (window.innerHeight > minCanvasHeight){
+      playerField[i].cardSprite.y = (playerField[i].cardSprite.y/canvas.height) * this.window.innerHeight;
+    }
+    if (window.innerWidth < maxCanvasWidth) {
+      playerField[i].cardSprite.x = (playerField[i].cardSprite.x/canvas.width) * this.window.innerWidth;
+    }
   }
   // adjust canvas width and height according to min and max values
   if (window.innerWidth < maxCanvasWidth) {
@@ -198,7 +203,7 @@ function Button(text, img, id, x, y) {
       this.sprite.height = (width/10) * (1/2);
 
       this.x = width*17/20;
-
+      
       if (this.pushed) {
         this.x = cursor.x - this.sprite.width/2;
         this.y = cursor.y - this.sprite.height/2;
@@ -406,6 +411,9 @@ var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2);
 var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50);
 var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50);
 
+var buttonArray = [];
+buttonArray.push(endButton, attackButton, abilityButton);
+
 function animate() {
   
   requestAnimationFrame(animate);
@@ -459,47 +467,12 @@ function animate() {
     playerDeck[i].cardSprite.y = playerHandY - playerDeck[i].cardSprite.sprite.height - i; // thicken deck with more cards
     playerDeck[i].cardSprite.update();
   }
-  endButton.buttonSprite.update();
-  attackButton.buttonSprite.update();
-  abilityButton.buttonSprite.update();
-  // cursor.update();
+  // render buttons
+  let buttonSpacing = canvas.height/40;
+  for (let i = 0; i < buttonArray.length; i++) {
+    buttonArray[i].buttonSprite.y = canvas.height/2 - (buttonArray.length*(buttonArray[i].buttonSprite.sprite.height + buttonSpacing)/2) + (i * (buttonArray[i].buttonSprite.sprite.height + buttonSpacing));
+    buttonArray[i].buttonSprite.update();
+  }
 }
 
 animate();
-
-//
-// recycling bin
-//
-
-
-// mouse down
-// for (let i = arrayOfPlayerCards.length-1; i >= 0; i--) {
-  //   if (cursor.x >= arrayOfPlayerCards[i].cardSprite.x && cursor.x <= arrayOfPlayerCards[i].cardSprite.x + arrayOfPlayerCards[i].cardSprite.sprite.width
-  //       && cursor.y >= arrayOfPlayerCards[i].cardSprite.y && cursor.y <= arrayOfPlayerCards[i].cardSprite.y + arrayOfPlayerCards[i].cardSprite.sprite.height) {
-        
-  //       arrayOfPlayerCards[i].cardSprite.grabbed = true;
-
-  //       // bug fix
-  //       arrayOfPlayerCards[i].cardSprite.x = cursor.x - arrayOfPlayerCards[i].cardSprite.sprite.width/2;
-  //       arrayOfPlayerCards[i].cardSprite.y = cursor.y - arrayOfPlayerCards[i].cardSprite.sprite.height/2;
-
-  //       // shift location of card to top layer of canvas rendering
-  //       var temporary = arrayOfPlayerCards[i];
-  //       arrayOfPlayerCards.splice(i,1);
-  //       arrayOfPlayerCards.push(temporary);
-
-  //       // store index of grabbed card
-  //       currentGrabbedIndex = arrayOfPlayerCards.length-1;
-       
-  //       break;
-  //     }
-  // }
-
-
-  // mouse up
-  // arrayOfPlayerCards[currentGrabbedIndex].cardSprite.grabbed = false;
-  // // makes ungrabbed cards decrease in size toward middle rather than top left
-  // arrayOfPlayerCards[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
-  // arrayOfPlayerCards[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
-  // // forget what's been grabbed
-  // currentGrabbedIndex = undefined;
