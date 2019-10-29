@@ -144,7 +144,7 @@ function Button(img, id) {
     pushed: false,
 
     sprite: {
-      img: document.querySelector('#card'), // or img?
+      img: cardBack, // or img?
       width: width/20,
       height: (width/20) * (1/2)
     },
@@ -277,11 +277,15 @@ canvas.addEventListener('mousedown', function(event) {
   mouseDownIteration(arrayOfPlayerCards);
   if (currentGrabbedIndex === undefined) {
     mouseDownIteration(playerHand);
+    if (currentGrabbedIndex === undefined) {
+      mouseDownIteration(playerField);
+    }
   }
 });
 canvas.addEventListener('mouseup', function(event) {
   mouseUpIteration(arrayOfPlayerCards);
   mouseUpIteration(playerHand);
+  mouseUpIteration(playerField);
 });
 canvas.addEventListener('dblclick', function(event) {
   event.preventDefault();
@@ -296,11 +300,15 @@ canvas.addEventListener('touchdown', function(event) {
   mouseDownIteration(arrayOfPlayerCards);
   if (currentGrabbedIndex === undefined) {
     mouseDownIteration(playerHand);
+    if (currentGrabbedIndex === undefined) {
+      mouseDownIteration(playerField);
+    }
   }
 });
 canvas.addEventListener('touchup', function(event) {
   mouseUpIteration(arrayOfPlayerCards);
   mouseUpIteration(playerHand);
+  mouseUpIteration(playerDeck);
 });
 
 
@@ -382,7 +390,7 @@ function animate() {
         //   arrayOfPlayerCards[i].cardSprite.update();
         // }
 
-  // animate hand
+  // animate player hand
   for (let i = 0; i < playerHand.length; i++) {
     // set player hand location correctly
     // create relative card positions in hand
