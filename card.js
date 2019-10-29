@@ -39,6 +39,11 @@ const maxHandSize = 7;
 const handArcAngle = Math.PI/3;
 
 window.addEventListener('resize', function() {
+  // reset field cards positions proportional to last position/window before reseting widths
+  for (let i = 0; i < playerField.length; i++) {
+    playerField[i].cardSprite.x = (playerField[i].cardSprite.x/canvas.width) * this.window.innerWidth;
+    playerField[i].cardSprite.y = (playerField[i].cardSprite.y/canvas.height) * this.window.innerHeight;
+  }
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   // reset zone locations
@@ -155,8 +160,10 @@ function Button(text, img, id, x, y) {
     draw: function() {
       // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
       c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
-      c.font = `${this.sprite.height * 3/4}px Arial`;//"30px Arial";
-      c.fillText(this.text, this.x, this.y + (this.sprite.height + this.sprite.height * 1/2)/2);
+      c.font = `${(this.sprite.height/2)}px Monaco`;
+      let xCentered = this.x + (this.sprite.width - (this.text.length * this.sprite.width/7))/2;
+      let yCentered = this.y + this.sprite.height/2 + this.sprite.height/6;
+      c.fillText(this.text, xCentered, yCentered, this.sprite.width);
     },
     
     update: function() {
@@ -369,9 +376,9 @@ enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 
-var endButton = new Button("End turn",0,0, canvas.width*3/4, canvas.height/2);
+var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2);
 var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50);
-var abilityButton = new Button("Use ability",0,0, canvas.width*3/4, canvas.height/2 + 50);
+var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50);
 
 function animate() {
   
