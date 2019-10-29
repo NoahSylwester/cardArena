@@ -135,7 +135,7 @@ function Card(img, atk, def, ability) {
   };
 };
 
-function Button(img, id, x, y) {
+function Button(text, img, id, x, y) {
   
   this.buttonSprite = {
     // initialize random stats
@@ -144,6 +144,7 @@ function Button(img, id, x, y) {
     dx: 0,
     dy: 0,
     pushed: false,
+    text: text,
 
     sprite: {
       img: cardBack, // or img?
@@ -154,6 +155,8 @@ function Button(img, id, x, y) {
     draw: function() {
       // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
       c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+      c.font = `${this.sprite.height * 3/4}px Arial`;//"30px Arial";
+      c.fillText(this.text, this.x, this.y + (this.sprite.height + this.sprite.height * 1/2)/2);
     },
     
     update: function() {
@@ -366,9 +369,9 @@ enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 
-var endButton = new Button(0,0, canvas.width*3/4, canvas.height/2);
-var attackButton = new Button(0,0, canvas.width*3/4, canvas.height/2 - 50);
-var abilityButton = new Button(0,0, canvas.width*3/4, canvas.height/2 + 50);
+var endButton = new Button("End turn",0,0, canvas.width*3/4, canvas.height/2);
+var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50);
+var abilityButton = new Button("Use ability",0,0, canvas.width*3/4, canvas.height/2 + 50);
 
 function animate() {
   
