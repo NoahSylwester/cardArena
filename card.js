@@ -14,9 +14,22 @@ current:
 var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
 
+const maxCanvasWidth = 800;
+var minCanvasHeight = canvas.width * (5/7);
+
 // set canvas dimensions
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+if (window.innerWidth < maxCanvasWidth) {
+  canvas.width = window.innerWidth;
+}
+else {
+  canvas.width = maxCanvasWidth;
+}
+if (window.innerHeight > minCanvasHeight) {
+  canvas.height = window.innerHeight;
+}
+else {
+  canvas.height = minCanvasHeight;
+}
 
 const cardFront = document.querySelector('#card-front');
 const cardBack = document.querySelector('#card-back');
@@ -39,13 +52,26 @@ const maxHandSize = 7;
 const handArcAngle = Math.PI/3;
 
 window.addEventListener('resize', function() {
-  // reset field cards positions proportional to last position/window before reseting widths
+  // reset field cards positions proportional to last position/window before resetting widths
   for (let i = 0; i < playerField.length; i++) {
     playerField[i].cardSprite.x = (playerField[i].cardSprite.x/canvas.width) * this.window.innerWidth;
     playerField[i].cardSprite.y = (playerField[i].cardSprite.y/canvas.height) * this.window.innerHeight;
   }
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // adjust canvas width and height according to min and max values
+  if (window.innerWidth < maxCanvasWidth) {
+    canvas.width = window.innerWidth;
+  }
+  else {
+    canvas.width = maxCanvasWidth;
+  }
+  minCanvasHeight = canvas.width * (5/7);
+  if (window.innerHeight > minCanvasHeight) {
+    canvas.height = window.innerHeight;
+  }
+  else {
+    canvas.height = minCanvasHeight;
+  }
+  
   // reset zone locations
   playerFieldY = canvas.height * (14/20);
   playerHandY = canvas.height * (19/20);
