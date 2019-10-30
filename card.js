@@ -164,7 +164,8 @@ function Card(img, atk, def, ability) {
   };
 };
 
-function Button(text, img, id, x, y) {
+function Button(text, img, id, x, y, func) {
+  this.effect = func;
   
   this.buttonSprite = {
     // initialize random stats
@@ -271,7 +272,7 @@ function checkForButtonPush() {
   for (let i = 0; i < buttonArray.length; i++) {
     if (cursor.x >= buttonArray[i].buttonSprite.x && cursor.x <= buttonArray[i].buttonSprite.x + buttonArray[i].buttonSprite.sprite.width
       && cursor.y >= buttonArray[i].buttonSprite.y && cursor.y <= buttonArray[i].buttonSprite.y + buttonArray[i].buttonSprite.sprite.height) {
-
+        buttonArray[i].effect();
         buttonArray[i].buttonSprite.pushed = true;
         break;
       }
@@ -279,7 +280,14 @@ function checkForButtonPush() {
 };
 function releaseAnyPushedButton() {
   for (let i = 0; i < buttonArray.length; i++) {
-    if (buttonArray[i].buttonSprite.pushed === true) {
+    if (buttonArray[i].buttonSprite.pushed === true && (cursor.x >= buttonArray[i].buttonSprite.x && cursor.x <= buttonArray[i].buttonSprite.x + buttonArray[i].buttonSprite.sprite.width
+      && cursor.y >= buttonArray[i].buttonSprite.y && cursor.y <= buttonArray[i].buttonSprite.y + buttonArray[i].buttonSprite.sprite.height)) {
+      
+        buttonArray[i].buttonSprite.pushed = false;
+        buttonArray[i].
+        break;
+    }
+     else if (buttonArray[i].buttonSprite.pushed === true) {
       buttonArray[i].buttonSprite.pushed = false;
       break;
     }
@@ -431,9 +439,9 @@ enemyDeck.push(new Card(cardBack,0,0,0));
 
 enemyField.push(new Card(cardBack,0,0,0));
 
-var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2);
-var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50);
-var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50);
+var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, function() {console.log('End')});
+var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50, function() {console.log('Attack')});
+var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50, function() {console.log('Ability')});
 
 
 var buttonArray = [];
