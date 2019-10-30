@@ -1,13 +1,6 @@
 /*
 end turn button
 tap effects
-
-current:
-  make player hand
-    cards can get dragged from hand to anywhere
-      if dropped within certain y window they will be 'played', otherwise returned to hand
-      if dropped onto enemy maybe they will also be 'played' if possible
-    cards in hand are arranged depending on how many
 */
 
 // define canvas
@@ -56,10 +49,10 @@ window.addEventListener('resize', function() {
   for (let i = 0; i < playerField.length; i++) {
     // not quite right here.. still movement downward and left
     if (window.innerHeight > minCanvasHeight){
-      playerField[i].cardSprite.y = (playerField[i].cardSprite.y/canvas.height) * this.window.innerHeight;
+      playerField[i].cardSprite.y = (playerField[i].cardSprite.y/canvas.height) * window.innerHeight;
     }
     if (window.innerWidth < maxCanvasWidth) {
-      playerField[i].cardSprite.x = (playerField[i].cardSprite.x/canvas.width) * this.window.innerWidth;
+      playerField[i].cardSprite.x = (playerField[i].cardSprite.x/canvas.width) * window.innerWidth;
     }
   }
   // adjust canvas width and height according to min and max values
@@ -183,18 +176,26 @@ function Button(text, img, id, x, y) {
     text: text,
 
     sprite: {
-      img: cardBack, // or img?
       width: width/10,
       height: (width/20) * (1/2)
     },
   
     draw: function() {
       // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
-      c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+      // c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+      c.fillStyle = "#6b2016";
+      c.fillRect(this.x, this.y, this.sprite.width, this.sprite.height);
       c.font = `${(this.sprite.height/2)}px Monaco`;
       let xCentered = this.x + (this.sprite.width - (this.text.length * this.sprite.width/7))/2;
       let yCentered = this.y + this.sprite.height/2 + this.sprite.height/6;
+      c.fillStyle = "#000000";
       c.fillText(this.text, xCentered, yCentered, this.sprite.width);
+      // check if pushed
+      if (this.pushed) {
+        // push effect
+        c.fillStyle = "#0000003b";
+        c.fillRect(this.x, this.y, this.sprite.width, this.sprite.height);
+      }
     },
     
     update: function() {
@@ -203,11 +204,6 @@ function Button(text, img, id, x, y) {
       this.sprite.height = (width/10) * (1/2);
 
       this.x = width*17/20;
-      
-      if (this.pushed) {
-        this.x = cursor.x - this.sprite.width/2;
-        this.y = cursor.y - this.sprite.height/2;
-      }
 
       this.draw();
     }
@@ -238,7 +234,7 @@ function mouseDownIteration(array) {
         array[i].cardSprite.y = cursor.y - array[i].cardSprite.sprite.height/2;
 
         // shift location of card to top layer of canvas rendering
-        if (array !== playerHand) {
+        if (array !== playerHand && array !== playerField) {
           var temporary = array[i];
           array.splice(i,1);
           array.push(temporary);
@@ -261,6 +257,7 @@ function mouseUpIteration(array) {
     array[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
     array[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
     // check if playing cards from hand
+    // array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= playerFieldY*7/10
     if (array === playerHand && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= playerFieldY*7/10) {
       var temp = array[currentGrabbedIndex];
       array.splice(currentGrabbedIndex,1);
@@ -473,13 +470,13 @@ function animate() {
 
   // animate player field
   for (let i = 0; i < playerField.length; i++) {
+    //((canvas.width - (playerField[i].cardSprite.sprite.width * (playerField.length/2))) + (playerField[i].cardSprite.sprite.width * i))/2 - playerField[i].cardSprite.sprite.width/4;
+    let spacing = canvas.width/20;
+    let startPointFromLeft = (canvas.width/2 - (playerField[i].cardSprite.sprite.width * playerField.length)/2);
+    playerField[i].cardSprite.x = startPointFromLeft + i * (playerField[i].cardSprite.sprite.width);
+    playerField[i].cardSprite.y = playerFieldY - canvas.height/6;
     playerField[i].cardSprite.update();
   }
-        // tester cards
-        // // animate array of player cards
-        // for (let i = 0; i < arrayOfPlayerCards.length; i++) {
-        //   arrayOfPlayerCards[i].cardSprite.update();
-        // }
 
   // animate player hand
   for (let i = 0; i < playerHand.length; i++) {
