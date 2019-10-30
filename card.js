@@ -359,7 +359,7 @@ canvas.addEventListener('touchmove', function(event){
   cursor.x = event.offsetX;
   cursor.y = event.offsetY;
 });
-canvas.addEventListener('touchdown', function(event) {
+canvas.addEventListener('touchstart', function(event) {
   event.preventDefault();
   checkForButtonPush();
   mouseDownIteration(arrayOfPlayerCards);
@@ -370,7 +370,7 @@ canvas.addEventListener('touchdown', function(event) {
     }
   }
 });
-canvas.addEventListener('touchup', function(event) {
+canvas.addEventListener('touchend', function(event) {
   event.preventDefault();
   releaseAnyPushedButton();
   mouseUpIteration(arrayOfPlayerCards);
