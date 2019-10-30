@@ -355,10 +355,12 @@ canvas.addEventListener('dblclick', function(event) {
 
 // mobile touch functions
 canvas.addEventListener('touchmove', function(event){
+  event.preventDefault();
   cursor.x = event.offsetX;
   cursor.y = event.offsetY;
 });
 canvas.addEventListener('touchdown', function(event) {
+  event.preventDefault();
   checkForButtonPush();
   mouseDownIteration(arrayOfPlayerCards);
   if (currentGrabbedIndex === undefined) {
@@ -369,6 +371,7 @@ canvas.addEventListener('touchdown', function(event) {
   }
 });
 canvas.addEventListener('touchup', function(event) {
+  event.preventDefault();
   releaseAnyPushedButton();
   mouseUpIteration(arrayOfPlayerCards);
   mouseUpIteration(playerHand);
