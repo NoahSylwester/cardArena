@@ -183,12 +183,12 @@ function Button(text, img, id, x, y) {
     draw: function() {
       // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
       // c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
-      c.fillStyle = "#6b2016";
+      c.fillStyle = "#61231aec";
       c.fillRect(this.x, this.y, this.sprite.width, this.sprite.height);
       c.font = `${(this.sprite.height/2)}px Monaco`;
       let xCentered = this.x + (this.sprite.width - (this.text.length * this.sprite.width/7))/2;
       let yCentered = this.y + this.sprite.height/2 + this.sprite.height/6;
-      c.fillStyle = "#000000";
+      c.fillStyle = "#cccccc";
       c.fillText(this.text, xCentered, yCentered, this.sprite.width);
       // check if pushed
       if (this.pushed) {
