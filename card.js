@@ -258,7 +258,7 @@ function mouseUpIteration(array) {
     array[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
     // check if playing cards from hand
     // array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= playerFieldY*7/10
-    if (array === playerHand && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= playerFieldY*7/10) {
+    if (array === playerHand && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= canvas.height/2) {
       var temp = array[currentGrabbedIndex];
       array.splice(currentGrabbedIndex,1);
       playerField.push(temp);
