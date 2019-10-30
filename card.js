@@ -270,6 +270,24 @@ function mouseUpIteration(array) {
     currentGrabbedIndex = undefined;
   }
 };
+function checkForButtonPush() {
+  for (let i = 0; i < buttonArray.length; i++) {
+    if (cursor.x >= buttonArray[i].buttonSprite.x && cursor.x <= buttonArray[i].buttonSprite.x + buttonArray[i].buttonSprite.sprite.width
+      && cursor.y >= buttonArray[i].buttonSprite.y && cursor.y <= buttonArray[i].buttonSprite.y + buttonArray[i].buttonSprite.sprite.height) {
+
+        buttonArray[i].buttonSprite.pushed = true;
+        break;
+      }
+  }
+};
+function releaseAnyPushedButton() {
+  for (let i = 0; i < buttonArray.length; i++) {
+    if (buttonArray[i].buttonSprite.pushed === true) {
+      buttonArray[i].buttonSprite.pushed = false;
+      break;
+    }
+  }
+}
 
 // arrays of cards
 var arrayOfPlayerCards = [];
@@ -319,6 +337,7 @@ canvas.addEventListener('click', function(event) {
   clickDeck(playerDeck);
 });
 canvas.addEventListener('mousedown', function(event) {
+  checkForButtonPush();
   mouseDownIteration(arrayOfPlayerCards);
   if (currentGrabbedIndex === undefined) {
     mouseDownIteration(playerHand);
@@ -328,6 +347,7 @@ canvas.addEventListener('mousedown', function(event) {
   }
 });
 canvas.addEventListener('mouseup', function(event) {
+  releaseAnyPushedButton();
   mouseUpIteration(arrayOfPlayerCards);
   mouseUpIteration(playerHand);
   mouseUpIteration(playerField);
@@ -342,6 +362,7 @@ canvas.addEventListener('touchmove', function(event){
   cursor.y = event.offsetY;
 });
 canvas.addEventListener('touchdown', function(event) {
+  checkForButtonPush();
   mouseDownIteration(arrayOfPlayerCards);
   if (currentGrabbedIndex === undefined) {
     mouseDownIteration(playerHand);
@@ -351,6 +372,7 @@ canvas.addEventListener('touchdown', function(event) {
   }
 });
 canvas.addEventListener('touchup', function(event) {
+  releaseAnyPushedButton();
   mouseUpIteration(arrayOfPlayerCards);
   mouseUpIteration(playerHand);
   mouseUpIteration(playerDeck);
@@ -411,6 +433,7 @@ var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2);
 var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50);
 var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50);
 
+
 var buttonArray = [];
 buttonArray.push(endButton, attackButton, abilityButton);
 
@@ -419,6 +442,14 @@ function animate() {
   requestAnimationFrame(animate);
 
   c.clearRect(0, 0, innerWidth, 2 * innerHeight);
+  // render field lines
+  c.beginPath(); 
+  // startpoint
+  c.moveTo(0, canvas.height/2);
+  // endpoint
+  c.lineTo(canvas.width, canvas.height/2);
+  // Make the line visible
+  c.stroke();
 
   // render enemy cards
   for (let i = 0; i < enemyField.length; i++) {
@@ -431,7 +462,6 @@ function animate() {
     // create relative card positions in hand
     enemyHand[i].cardSprite.x = ((canvas.width - (enemyHand[i].cardSprite.sprite.width * (enemyHand.length/2))) + (enemyHand[i].cardSprite.sprite.width * i))/2 - enemyHand[i].cardSprite.sprite.width/4;
     let radians = (((handArcAngle) * (i + 0.5)/enemyHand.length)-(handArcAngle/2));
-    // enemyHand[i].cardSprite.x = (canvas.width - enemyHand[i].cardSprite.sprite.width)/2;
     enemyHand[i].cardSprite.y = enemyHandY/10;// - enemyHand[i].cardSprite.sprite.height;
     enemyHand[i].cardSprite.update(radians);
   }
@@ -457,7 +487,6 @@ function animate() {
     // create relative card positions in hand
     playerHand[i].cardSprite.x = ((canvas.width - (playerHand[i].cardSprite.sprite.width * (playerHand.length/2))) + (playerHand[i].cardSprite.sprite.width * i))/2 - playerHand[i].cardSprite.sprite.width/4;
     let radians = ((handArcAngle) * (i + 0.5)/playerHand.length)-(handArcAngle/2);
-    // playerHand[i].cardSprite.x = (canvas.width - playerHand[i].cardSprite.sprite.width)/2;
     playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);
     playerHand[i].cardSprite.update(radians);
   }
@@ -470,7 +499,7 @@ function animate() {
   // render buttons
   let buttonSpacing = canvas.height/40;
   for (let i = 0; i < buttonArray.length; i++) {
-    buttonArray[i].buttonSprite.y = canvas.height/2 - (buttonArray.length*(buttonArray[i].buttonSprite.sprite.height + buttonSpacing)/2) + (i * (buttonArray[i].buttonSprite.sprite.height + buttonSpacing));
+    buttonArray[i].buttonSprite.y = canvas.height/2 - (buttonArray.length*(buttonArray[i].buttonSprite.sprite.height + buttonSpacing*(3/4))/2) + (i * (buttonArray[i].buttonSprite.sprite.height + buttonSpacing));
     buttonArray[i].buttonSprite.update();
   }
 }
