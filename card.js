@@ -469,14 +469,27 @@ function animate() {
   }
 
   // animate player field
-  for (let i = 0; i < playerField.length; i++) {
-    //((canvas.width - (playerField[i].cardSprite.sprite.width * (playerField.length/2))) + (playerField[i].cardSprite.sprite.width * i))/2 - playerField[i].cardSprite.sprite.width/4;
-    let spacing = canvas.width/20;
-    let startPointFromLeft = (canvas.width/2 - (playerField[i].cardSprite.sprite.width * playerField.length)/2);
-    playerField[i].cardSprite.x = startPointFromLeft + i * (playerField[i].cardSprite.sprite.width);
-    playerField[i].cardSprite.y = playerFieldY - canvas.height/6;
-    playerField[i].cardSprite.update();
+ if (playerField.length > 0) {
+   // default lastRendered index is last item in array
+   let lastRendered = playerField.length - 1;
+  for (let i = 0; i <= playerField.length; i++) {
+    if (i === playerField.length) {
+      playerField[lastRendered].cardSprite.update();
+    }
+    else if (playerField[i].cardSprite.grabbed) {
+      // stores grabbed card and waits to render it so that it appears above everything else
+      lastRendered = i;
+    }
+    else {
+      // displays centered player field cards
+      let spacing = canvas.width/20;
+      let startPointFromLeft = (canvas.width/2 - (playerField[i].cardSprite.sprite.width * playerField.length)/2);
+      playerField[i].cardSprite.x = startPointFromLeft + i * (playerField[i].cardSprite.sprite.width);
+      playerField[i].cardSprite.y = playerFieldY - canvas.height/6;
+      playerField[i].cardSprite.update();
+    }
   }
+ }
 
   // animate player hand
   for (let i = 0; i < playerHand.length; i++) {
