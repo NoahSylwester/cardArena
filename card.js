@@ -426,6 +426,8 @@ enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 
+enemyField.push(new Card(cardBack,0,0,0));
+
 var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2);
 var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50);
 var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50);
@@ -450,6 +452,11 @@ function animate() {
 
   // render enemy cards
   for (let i = 0; i < enemyField.length; i++) {
+    // displays centered player field cards
+    let spacing = canvas.width/20;
+    let startPointFromLeft = (canvas.width/2 - (enemyField[i].cardSprite.sprite.width * enemyField.length)/2);
+    enemyField[i].cardSprite.x = startPointFromLeft + i * (enemyField[i].cardSprite.sprite.width);
+    enemyField[i].cardSprite.y = canvas.height/2 - enemyField[i].cardSprite.sprite.height - canvas.height/30;
     enemyField[i].cardSprite.update();
   }
   for (let i = 0; i < enemyHand.length; i++) {
@@ -467,7 +474,18 @@ function animate() {
     enemyDeck[i].cardSprite.y = enemyHandY - i;
     enemyDeck[i].cardSprite.update();
   }
-
+  // render buttons
+  let buttonSpacing = canvas.height/40;
+  for (let i = 0; i < buttonArray.length; i++) {
+    buttonArray[i].buttonSprite.y = canvas.height/2 - (buttonArray.length*(buttonArray[i].buttonSprite.sprite.height + buttonSpacing*(3/4))/2) + (i * (buttonArray[i].buttonSprite.sprite.height + buttonSpacing));
+    buttonArray[i].buttonSprite.update();
+  }
+  // animate player deck
+  for (let i = 0; i < playerDeck.length; i++) {
+    playerDeck[i].cardSprite.x = playerDeckX - canvas.width/10;
+    playerDeck[i].cardSprite.y = playerHandY - playerDeck[i].cardSprite.sprite.height - i; // thicken deck with more cards
+    playerDeck[i].cardSprite.update();
+  }
   // animate player field
  if (playerField.length > 0) {
    // default lastRendered index is last item in array
@@ -485,12 +503,11 @@ function animate() {
       let spacing = canvas.width/20;
       let startPointFromLeft = (canvas.width/2 - (playerField[i].cardSprite.sprite.width * playerField.length)/2);
       playerField[i].cardSprite.x = startPointFromLeft + i * (playerField[i].cardSprite.sprite.width);
-      playerField[i].cardSprite.y = playerFieldY - canvas.height/6;
+      playerField[i].cardSprite.y = canvas.height/2 + canvas.height/30;// playerFieldY - canvas.height/6;
       playerField[i].cardSprite.update();
     }
   }
  }
-
   // animate player hand
   for (let i = 0; i < playerHand.length; i++) {
     // set player hand location correctly
@@ -499,18 +516,6 @@ function animate() {
     let radians = ((handArcAngle) * (i + 0.5)/playerHand.length)-(handArcAngle/2);
     playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);
     playerHand[i].cardSprite.update(radians);
-  }
-  // animate player deck
-  for (let i = 0; i < playerDeck.length; i++) {
-    playerDeck[i].cardSprite.x = playerDeckX - canvas.width/10;
-    playerDeck[i].cardSprite.y = playerHandY - playerDeck[i].cardSprite.sprite.height - i; // thicken deck with more cards
-    playerDeck[i].cardSprite.update();
-  }
-  // render buttons
-  let buttonSpacing = canvas.height/40;
-  for (let i = 0; i < buttonArray.length; i++) {
-    buttonArray[i].buttonSprite.y = canvas.height/2 - (buttonArray.length*(buttonArray[i].buttonSprite.sprite.height + buttonSpacing*(3/4))/2) + (i * (buttonArray[i].buttonSprite.sprite.height + buttonSpacing));
-    buttonArray[i].buttonSprite.update();
   }
 }
 
