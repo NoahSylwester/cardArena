@@ -196,6 +196,7 @@ function Card(img, atk, def, ability) {
           this.selected = false;
         }
       }
+      // un-highlights card if ability is used on it
       else {
         this.selected = false;
       }
@@ -307,7 +308,7 @@ function mouseUpIteration(array) {
     array[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
     // check if playing cards from hand
     // array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= playerFieldY*7/10
-    if (array === playerHand && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= canvas.height/2) {
+    if (!checkIfAnySelectedCards() && array === playerHand && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= canvas.height/2) {
       var temp = array[currentGrabbedIndex];
       array.splice(currentGrabbedIndex,1);
       playerField.push(temp);
@@ -366,6 +367,23 @@ function checkCardCoordinatesOfArray(array) {
           zoomedCard = array[i];
     }
   }
+}
+function checkIfAnySelectedCards() {
+  let anySelected = false;
+  for (let i = 0; i < enemyField.length; i++) {
+    if (enemyField[i].cardSprite.selected) {
+      anySelected = true;
+    }
+  }
+  for (let i = 0; i < playerField.length; i++) {
+    if (playerField[i].cardSprite.selected) {
+      anySelected = true;
+    }
+  }
+  if (anySelected) {
+    return true;
+  }
+  return false;
 }
 function zoomOnDoubleClickedCard() {
   checkCardCoordinatesOfArray(playerHand);
