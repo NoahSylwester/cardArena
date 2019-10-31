@@ -38,7 +38,8 @@ var playerHandY = canvas.height * (19/20);
 var playerDeckX = canvas.width * (19/20);
 // enemy zone
 var enemyFieldY = canvas.height * (6/20);
-var enemyHandY = canvas.height * (1/20);
+var enemyHandY = -12;//canvas.height * (1/20);
+var enemyDeckY = canvas.height * (1/20);
 var enemyDeckX = canvas.width * (1/20);
 
 // max hand size
@@ -81,7 +82,8 @@ window.addEventListener('resize', function() {
   playerHandY = canvas.height * (19/20);
   playerDeckX = canvas.width * (19/20);
   enemyFieldY = canvas.height * (6/20);
-  enemyHandY = canvas.height * (1/20);
+  enemyHandY = -12;
+  enemyDeckY = canvas.height * (1/20);
   enemyDeckX = canvas.width * (1/20);
 });
 window.addEventListener('orientationchange', function() {
@@ -90,10 +92,11 @@ window.addEventListener('orientationchange', function() {
   // reset zone locations
   playerFieldY = canvas.height * (14/20);
   playerHandY = canvas.height * (19/20);
-  playerDeckX = 0;
-  enemyFieldY = 0;
-  enemyHandY = 0;
-  enemyDeckX = 0;
+  playerDeckX = canvas.width * (19/20);
+  enemyFieldY = canvas.height * (6/20);
+  enemyHandY = -100;
+  enemyDeckY = canvas.height * (1/20);
+  enemyDeckX = canvas.width * (1/20);
 });
 
 // start of card arena code
@@ -579,6 +582,9 @@ enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 
 enemyField.push(new Card(cardBack,0,0,0));
+enemyField.push(new Card(cardBack,0,0,0));
+enemyField.push(new Card(cardBack,0,0,0));
+enemyField.push(new Card(cardBack,0,0,0));
 playerField.push(new Card(cardBack,0,0,function(card) {alert('ability!')}));
 
 var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, function() {console.log('End')});
@@ -603,7 +609,7 @@ function animate() {
   // Make the line visible
   c.stroke();
 
-  // render enemy cards
+  // render enemy field cards
   for (let i = 0; i < enemyField.length; i++) {
     // displays centered player field cards
     let spacing = canvas.width/50;
@@ -612,6 +618,7 @@ function animate() {
     enemyField[i].cardSprite.y = canvas.height/2 - enemyField[i].cardSprite.sprite.height - canvas.height/30;
     enemyField[i].cardSprite.update();
   }
+  // enemy hand
   for (let i = 0; i < enemyHand.length; i++) {
     // flip cards
     enemyHand[i].cardSprite.sprite.img = cardBack;
@@ -619,12 +626,13 @@ function animate() {
     // create relative card positions in hand
     enemyHand[i].cardSprite.x = ((canvas.width - (enemyHand[i].cardSprite.sprite.width * (enemyHand.length/2))) + (enemyHand[i].cardSprite.sprite.width * i))/2 - enemyHand[i].cardSprite.sprite.width/4;
     let radians = (((handArcAngle) * (i + 0.5)/enemyHand.length)-(handArcAngle/2));
-    enemyHand[i].cardSprite.y = enemyHandY/10;// - enemyHand[i].cardSprite.sprite.height;
+    enemyHand[i].cardSprite.y = enemyHandY;
     enemyHand[i].cardSprite.update(radians);
   }
+  // enemy deck
   for (let i = 0; i < enemyDeck.length; i++) {
     enemyDeck[i].cardSprite.x = enemyDeckX;
-    enemyDeck[i].cardSprite.y = enemyHandY - i;
+    enemyDeck[i].cardSprite.y = enemyDeckY - i;
     enemyDeck[i].cardSprite.update();
   }
   // render buttons
