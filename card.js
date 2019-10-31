@@ -260,6 +260,7 @@ function Button(text, img, id, x, y, func) {
 };
 
 function clickDeck(array) {
+  // draw a card
   if (cursor.x >= array[array.length-1].cardSprite.x && cursor.x <= array[array.length-1].cardSprite.x + array[array.length-1].cardSprite.sprite.width
     && cursor.y >= array[array.length-1].cardSprite.y && cursor.y <= array[array.length-1].cardSprite.y + array[array.length-1].cardSprite.sprite.height) {
       // check hand size against max
@@ -268,6 +269,7 @@ function clickDeck(array) {
         array[array.length-1].cardSprite.sprite.img = cardFront;
         playerHand.push(array.pop());
       }
+      // bug fix for doubleclick
       isDeckClicked = true;
     }
 }
@@ -320,22 +322,24 @@ function mouseUpIteration(array) {
   }
 };
 function checkForButtonPush() {
+  // depress button on click
   for (let i = 0; i < buttonArray.length; i++) {
     if (cursor.x >= buttonArray[i].buttonSprite.x && cursor.x <= buttonArray[i].buttonSprite.x + buttonArray[i].buttonSprite.sprite.width
       && cursor.y >= buttonArray[i].buttonSprite.y && cursor.y <= buttonArray[i].buttonSprite.y + buttonArray[i].buttonSprite.sprite.height) {
-        buttonArray[i].effect();
+
         buttonArray[i].buttonSprite.pushed = true;
         break;
       }
   }
 };
 function releaseAnyPushedButton() {
+  // execute button effect if cursor released still on button
   for (let i = 0; i < buttonArray.length; i++) {
     if (buttonArray[i].buttonSprite.pushed === true && (cursor.x >= buttonArray[i].buttonSprite.x && cursor.x <= buttonArray[i].buttonSprite.x + buttonArray[i].buttonSprite.sprite.width
       && cursor.y >= buttonArray[i].buttonSprite.y && cursor.y <= buttonArray[i].buttonSprite.y + buttonArray[i].buttonSprite.sprite.height)) {
       
         buttonArray[i].buttonSprite.pushed = false;
-        buttonArray[i].
+        buttonArray[i].effect()
         break;
     }
      else if (buttonArray[i].buttonSprite.pushed === true) {
@@ -345,6 +349,7 @@ function releaseAnyPushedButton() {
   }
 }
 function executeActionOnSelectedCard() {
+  // use grabbed card's ability on selected card
   let currentSelectedCard;
   for (let i = 0; i < enemyField.length; i++) {
     if (enemyField[i].cardSprite.selected) {
@@ -361,6 +366,7 @@ function executeActionOnSelectedCard() {
   }
 }
 function checkCardCoordinatesOfArray(array) {
+  // check coords of all cards in the array, zoom on the one clicked
   for (let i = array.length-1; i >= 0; i--) {
     if (cursor.x >= array[i].cardSprite.x && cursor.x <= array[i].cardSprite.x + array[i].cardSprite.sprite.width
         && cursor.y >= array[i].cardSprite.y && cursor.y <= array[i].cardSprite.y + array[i].cardSprite.sprite.height) {
@@ -371,6 +377,7 @@ function checkCardCoordinatesOfArray(array) {
 }
 function checkIfAnySelectedCards() {
   let anySelected = false;
+  // run through both field arrays to see if any are selected
   for (let i = 0; i < enemyField.length; i++) {
     if (enemyField[i].cardSprite.selected) {
       anySelected = true;
