@@ -268,6 +268,7 @@ function clickDeck(array) {
         array[array.length-1].cardSprite.sprite.img = cardFront;
         playerHand.push(array.pop());
       }
+      isDeckClicked = true;
     }
 }
 
@@ -407,6 +408,8 @@ var arrayOfStatusEffectImages = [];
 var currentGrabbedIndex;
 var grabSizeMultiplier = 10/9;
 var zoomedCard;
+// bug fix to prevent doubleclick from zooming on second card drawn from deck quickly
+var isDeckClicked = false;
 
 // cursor attributes
 var cursor = {
@@ -468,7 +471,7 @@ canvas.addEventListener('mouseup', function(event) {
   }
 });
 canvas.addEventListener('dblclick', function(event) {
-  if (zoomedCard === undefined) {
+  if (zoomedCard === undefined && isDeckClicked === false) {
     event.preventDefault();
     zoomOnDoubleClickedCard();
   }
@@ -657,6 +660,7 @@ function animate() {
     let y = canvas.height/2 - zoomHeight/2;
     c.drawImage(zoomedCard.cardSprite.sprite.img, x, y, zoomWidth, zoomHeight);
   }
+  isDeckClicked = false;
 }
 
 animate();
