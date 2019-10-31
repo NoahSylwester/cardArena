@@ -342,6 +342,23 @@ function releaseAnyPushedButton() {
     }
   }
 }
+function executeActionOnSelectedCard() {
+  let currentSelectedCard;
+  for (let i = 0; i < enemyField.length; i++) {
+    if (enemyField[i].cardSprite.selected) {
+      currentSelectedCard = enemyField[i];
+    }
+  }
+  for (let i = 0; i < playerField.length; i++) {
+    if (playerField[i].cardSprite.selected) {
+      currentSelectedCard = playerField[i];
+    }
+  }
+  if (currentSelectedCard !== undefined && typeof currentGrabbedCard.ability === "function") {
+    currentGrabbedCard.ability(currentSelectedCard);
+  }
+}
+
 
 // arrays of cards
 var arrayOfPlayerCards = [];
@@ -402,6 +419,7 @@ canvas.addEventListener('mousedown', function(event) {
 });
 canvas.addEventListener('mouseup', function(event) {
   releaseAnyPushedButton();
+  executeActionOnSelectedCard();
   mouseUpIteration(arrayOfPlayerCards);
   mouseUpIteration(playerHand);
   mouseUpIteration(playerField);
@@ -487,6 +505,7 @@ enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 
 enemyField.push(new Card(cardBack,0,0,0));
+playerField.push(new Card(cardBack,0,0,function(card) {alert('worked')}));
 
 var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, function() {console.log('End')});
 var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50, function() {console.log('Attack')});
