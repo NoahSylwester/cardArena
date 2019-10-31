@@ -168,10 +168,10 @@ function Card(img, atk, def, ability) {
 // check if selected by hover
       if (currentGrabbedCard !== undefined) {
         // check if selected via drag and not deck
-        let check1 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 >= this.x;
-        let check2 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 <= this.x + this.sprite.width;
-        let check3 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 >= this.y;
-        let check4 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 <= this.y + this.sprite.height;
+        let check1 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 >= this.x + (this.x*0.001);
+        let check2 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 <= (this.x + this.sprite.width) - (this.x + this.sprite.width)*0.001;
+        let check3 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 >= this.y + (this.y*0.001);
+        let check4 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 <= (this.y + this.sprite.height) - (this.y + this.sprite.height)*0.001;
         let check5 = this !== currentGrabbedCard.cardSprite;
         let check6 = function(arg) {
           for (let i = 0; i < playerDeck.length; i++) {
