@@ -1,6 +1,8 @@
 /*
 end turn button
-tap effects
+
+place cards at point in the grid between cards correctly
+max field size, fill second row
 */
 
 // define canvas
@@ -41,6 +43,8 @@ var enemyDeckX = canvas.width * (1/20);
 
 // max hand size
 const maxHandSize = 7;
+// max field size
+const maxFieldSize = 6;
 // hand fan angle
 const handArcAngle = Math.PI/3;
 // current grabbed card
@@ -310,11 +314,25 @@ function mouseUpIteration(array) {
     array[currentGrabbedIndex].cardSprite.x += ((width/10 * grabSizeMultiplier) - width/10)/2;
     array[currentGrabbedIndex].cardSprite.y += ((width/10 * grabSizeMultiplier) * (2000/1422) - (width/10) * (2000/1422))/2;
     // check if playing cards from hand
-    // array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= playerFieldY*7/10
-    if (!checkIfAnySelectedCards() && array === playerHand && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= canvas.height/2) {
+      // check if anything selected, if dragged card is from hand, if few enough cards in field, and if dragged to field area
+    if (!checkIfAnySelectedCards() && array === playerHand && playerField.length < maxFieldSize && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= canvas.height/2) {
       var temp = array[currentGrabbedIndex];
       array.splice(currentGrabbedIndex,1);
-      playerField.push(temp);
+      // insert cards onto field in location specified by player
+      for (let i = 0; i < playerField.length; i++) {
+        if (i === 0 && temp.cardSprite.x <= playerField[i].cardSprite.x) {
+          playerField.unshift(temp);
+          break;
+        }
+        else if (i === playerField.length - 1 && temp.cardSprite.x > playerField[i].cardSprite.x) {
+          playerField.push(temp);
+          break;
+        }
+        else if (temp.cardSprite.x > playerField[i].cardSprite.x && temp.cardSprite.x <= playerField[i + 1].cardSprite.x) {
+          playerField.splice(i + 1, 0, temp);
+          break;
+        }
+      }
     }
     // forget what's been grabbed
     currentGrabbedCard = undefined;
@@ -518,10 +536,10 @@ arrayOfPlayerCards.push(new Card(cardFront,3,0,0));
 arrayOfPlayerCards.push(new Card(cardFront,4,0,0));
 
 playerHand.push(new Card(cardFront,0,0,0));
+playerHand.push(new Card(cardBack,0,0,0));
 playerHand.push(new Card(cardFront,0,0,0));
 playerHand.push(new Card(cardFront,0,0,0));
-playerHand.push(new Card(cardFront,0,0,0));
-playerHand.push(new Card(cardFront,0,0,0));
+playerHand.push(new Card(cardBack,0,0,0));
 playerHand.push(new Card(cardFront,0,0,0));
 playerHand.push(new Card(cardFront,0,0,0));
 
