@@ -118,8 +118,8 @@ function Card(img, atk, def, ability) {
 
     sprite: {
       img: img,
-      width: width/10,
-      height: (width/10) * (2000/1422)
+      width: canvas.width/10,
+      height: (canvas.width/10) * (2000/1422)
     },
   
     draw: function(radians) {
@@ -358,6 +358,20 @@ function executeActionOnSelectedCard() {
     currentGrabbedCard.ability(currentSelectedCard);
   }
 }
+function checkCardCoordinatesOfArray(array) {
+  for (let i = array.length-1; i >= 0; i--) {
+    if (cursor.x >= array[i].cardSprite.x && cursor.x <= array[i].cardSprite.x + array[i].cardSprite.sprite.width
+        && cursor.y >= array[i].cardSprite.y && cursor.y <= array[i].cardSprite.y + array[i].cardSprite.sprite.height) {
+          
+          zoomedCard = array[i];
+    }
+  }
+}
+function zoomOnDoubleClickedCard() {
+  checkCardCoordinatesOfArray(playerHand);
+  checkCardCoordinatesOfArray(playerField);
+  checkCardCoordinatesOfArray(enemyField);
+}
 
 
 // arrays of cards
@@ -374,6 +388,7 @@ var enemyDeck = [];
 var arrayOfStatusEffectImages = [];
 var currentGrabbedIndex;
 var grabSizeMultiplier = 10/9;
+var zoomedCard;
 
 // cursor attributes
 var cursor = {
@@ -405,27 +420,40 @@ canvas.addEventListener('mousemove', function(event) {
     cursor.y = event.offsetY;
 });
 canvas.addEventListener('click', function(event) {
-  clickDeck(playerDeck);
+  if (zoomedCard === undefined) {
+    clickDeck(playerDeck);
+  }
+  else {
+    // escape zoom
+    zoomedCard = undefined;
+  }
 });
 canvas.addEventListener('mousedown', function(event) {
-  checkForButtonPush();
-  mouseDownIteration(arrayOfPlayerCards);
-  if (currentGrabbedIndex === undefined) {
-    mouseDownIteration(playerHand);
+  if (zoomedCard === undefined) {
+    checkForButtonPush();
+    mouseDownIteration(arrayOfPlayerCards);
     if (currentGrabbedIndex === undefined) {
-      mouseDownIteration(playerField);
+      mouseDownIteration(playerHand);
+      if (currentGrabbedIndex === undefined) {
+        mouseDownIteration(playerField);
+      }
     }
   }
 });
 canvas.addEventListener('mouseup', function(event) {
-  releaseAnyPushedButton();
-  executeActionOnSelectedCard();
-  mouseUpIteration(arrayOfPlayerCards);
-  mouseUpIteration(playerHand);
-  mouseUpIteration(playerField);
+  if (zoomedCard === undefined) {
+    releaseAnyPushedButton();
+    executeActionOnSelectedCard();
+    mouseUpIteration(arrayOfPlayerCards);
+    mouseUpIteration(playerHand);
+    mouseUpIteration(playerField);
+  }
 });
 canvas.addEventListener('dblclick', function(event) {
-  event.preventDefault();
+  if (zoomedCard === undefined) {
+    event.preventDefault();
+    zoomOnDoubleClickedCard();
+  }
 });
 
 // mobile touch functions
@@ -595,6 +623,21 @@ function animate() {
     let radians = ((handArcAngle) * (i + 0.5)/playerHand.length)-(handArcAngle/2);
     playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);
     playerHand[i].cardSprite.update(radians);
+  }
+  // render zoomed card
+  if (zoomedCard !== undefined) {
+    let zoomWidth;
+    // account for a variety of screen ratios
+    if (canvas.height >= canvas.width * (2/3) * (2000/1422)) {
+      zoomWidth = canvas.width * (2/3);
+    }
+    else {
+      zoomWidth = canvas.width * (1/2);      
+    }
+    let zoomHeight = zoomWidth * (2000/1422);
+    let x = canvas.width/2 - zoomWidth/2;
+    let y = canvas.height/2 - zoomHeight/2;
+    c.drawImage(zoomedCard.cardSprite.sprite.img, x, y, zoomWidth, zoomHeight);
   }
 }
 
