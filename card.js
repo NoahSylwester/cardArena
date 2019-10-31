@@ -43,6 +43,8 @@ var enemyDeckX = canvas.width * (1/20);
 const maxHandSize = 7;
 // hand fan angle
 const handArcAngle = Math.PI/3;
+// current grabbed card
+var currentGrabbedCard;
 
 window.addEventListener('resize', function() {
   // reset field cards positions proportional to last position/window before resetting widths
@@ -112,6 +114,7 @@ function Card(img, atk, def, ability) {
     dx: 0,
     dy: 0,
     grabbed: false,
+    selected: false,
 
     sprite: {
       img: img,
@@ -127,7 +130,16 @@ function Card(img, atk, def, ability) {
         c.drawImage(this.sprite.img, -this.sprite.width/2, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12, this.sprite.width, this.sprite.height);            
         c.rotate(-radians);
         c.translate(-(this.x+this.sprite.width/2), -(this.y+this.sprite.height/2));
-        
+      }
+      else if (this.selected) {
+        // highlight selected card
+        let selectedGlowWidth = this.sprite.width * 15/14;
+        let selectedGlowHeight = this.sprite.height * 15/14;
+        let selectedGlowX = this.x - (selectedGlowWidth - this.sprite.width)/2;
+        let selectedGlowY = this.y - (selectedGlowHeight - this.sprite.height)/2;
+        c.fillStyle = "#143a0cc5";
+        c.fillRect(selectedGlowX, selectedGlowY, selectedGlowWidth, selectedGlowHeight);
+        c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
       }
       else {
         // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
@@ -153,6 +165,41 @@ function Card(img, atk, def, ability) {
         this.x = cursor.x - this.sprite.width/2;
         this.y = cursor.y - this.sprite.height/2;
       }
+// check if selected by hover
+      if (currentGrabbedCard !== undefined) {
+        // check if selected via drag
+        let check1 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 >= this.x;
+        let check2 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 <= this.x + this.sprite.width;
+        let check3 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 >= this.y;
+        let check4 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 <= this.y + this.sprite.height;
+        let check5 = this !== currentGrabbedCard.cardSprite;
+        let check6 = function(arg) {
+          for (let i = 0; i < playerDeck.length; i++) {
+            if (playerDeck[i].cardSprite === arg) {
+              return false;
+            }
+          }
+          return true;
+        }(this);
+        let check7 = function(arg) {
+          for (let i = 0; i < enemyDeck.length; i++) {
+            if (enemyDeck[i].cardSprite === arg) {
+              return false;
+            }
+          }
+          return true;
+        }(this);
+        if (check1 && check2 && check3 && check4 && check5 && check6 && check7) {
+          this.selected = true;
+        }
+        else {
+          this.selected = false;
+        }
+      }
+      else {
+        this.selected = false;
+      }
+// end check
       // check if rotated
       if (radians !== undefined) {
         this.draw(radians);
@@ -229,6 +276,7 @@ function mouseDownIteration(array) {
         && cursor.y >= array[i].cardSprite.y && cursor.y <= array[i].cardSprite.y + array[i].cardSprite.sprite.height) {
         
         array[i].cardSprite.grabbed = true;
+        currentGrabbedCard = array[i];
 
         // bug fix
         array[i].cardSprite.x = cursor.x - array[i].cardSprite.sprite.width/2;
@@ -265,6 +313,7 @@ function mouseUpIteration(array) {
       playerField.push(temp);
     }
     // forget what's been grabbed
+    currentGrabbedCard = undefined;
     currentGrabbedIndex = undefined;
   }
 };
