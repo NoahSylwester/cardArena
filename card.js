@@ -505,7 +505,7 @@ enemyDeck.push(new Card(cardBack,0,0,0));
 enemyDeck.push(new Card(cardBack,0,0,0));
 
 enemyField.push(new Card(cardBack,0,0,0));
-playerField.push(new Card(cardBack,0,0,function(card) {alert('worked')}));
+playerField.push(new Card(cardBack,0,0,function(card) {alert('ability!')}));
 
 var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, function() {console.log('End')});
 var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50, function() {console.log('Attack')});
@@ -532,9 +532,9 @@ function animate() {
   // render enemy cards
   for (let i = 0; i < enemyField.length; i++) {
     // displays centered player field cards
-    let spacing = canvas.width/20;
-    let startPointFromLeft = (canvas.width/2 - (enemyField[i].cardSprite.sprite.width * enemyField.length)/2);
-    enemyField[i].cardSprite.x = startPointFromLeft + i * (enemyField[i].cardSprite.sprite.width);
+    let spacing = canvas.width/50;
+    let startPointFromLeft = (canvas.width/2 - (enemyField[i].cardSprite.sprite.width * enemyField.length)/2) - spacing/2 * (enemyField.length - 1);
+    enemyField[i].cardSprite.x = startPointFromLeft + i * (enemyField[i].cardSprite.sprite.width) + spacing * i;
     enemyField[i].cardSprite.y = canvas.height/2 - enemyField[i].cardSprite.sprite.height - canvas.height/30;
     enemyField[i].cardSprite.update();
   }
@@ -579,9 +579,9 @@ function animate() {
     }
     else {
       // displays centered player field cards
-      let spacing = canvas.width/20;
-      let startPointFromLeft = (canvas.width/2 - (playerField[i].cardSprite.sprite.width * playerField.length)/2);
-      playerField[i].cardSprite.x = startPointFromLeft + i * (playerField[i].cardSprite.sprite.width);
+      let spacing = canvas.width/50;
+      let startPointFromLeft = (canvas.width/2 - (playerField[i].cardSprite.sprite.width * playerField.length)/2) - spacing/2 * (playerField.length - 1);
+      playerField[i].cardSprite.x = startPointFromLeft + i * (playerField[i].cardSprite.sprite.width) + spacing * i;
       playerField[i].cardSprite.y = canvas.height/2 + canvas.height/30;// playerFieldY - canvas.height/6;
       playerField[i].cardSprite.update();
     }
