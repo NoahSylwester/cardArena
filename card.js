@@ -741,6 +741,31 @@ function animate() {
     let x = canvas.width/2 - zoomWidth/2;
     let y = canvas.height/2 - zoomHeight/2;
     c.drawImage(zoomedCard.cardSprite.sprite.img, x, y, zoomWidth, zoomHeight);
+    if (zoomedCard.cardSprite.sprite.img !== cardBack) {
+      // handle different length numbers for atk and def, to be used in drawing text
+      let atkTextAdjust;
+      if (zoomedCard.cardSprite.atk.toString().length > 1) {
+        atkTextAdjust = zoomWidth * 1/50;
+      }
+      else {
+        atkTextAdjust = zoomWidth * 1/19;
+      }
+      let defTextAdjust;
+      if (zoomedCard.cardSprite.def.toString().length > 1) {
+        defTextAdjust = zoomWidth * 1/50;
+      }
+      else {
+        defTextAdjust = zoomWidth * 1/19;
+      }
+      // write atk and def if face-up
+      c.fillStyle = "#cccccc";
+      c.font = `${(zoomHeight/8)}px Monaco`;
+  
+      // write atk
+      c.fillText(zoomedCard.cardSprite.atk, x + atkTextAdjust, y + zoomHeight * 27/28, zoomWidth/6);
+      // write def
+      c.fillText(zoomedCard.cardSprite.def, x + (zoomWidth * 31/40) + defTextAdjust, y + zoomHeight * 27/28, zoomWidth/6);
+    }
   }
   isDeckClicked = false;
 }

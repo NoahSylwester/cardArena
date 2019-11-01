@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+    html {
+      height: 100%;
+    }
+    body {
+      background-image: url('https://images.unsplash.com/photo-1491982883790-ead7c97a047e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=685&q=80');
+      background-size: cover;
+    }
+    .build-area {
+      height: 500px;
+      overflow: scroll;
+      text-align: center;
+      border: 1px black solid;
+      padding: 10px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.356);
+    }
+    .deck-area {
+      height: 500px;
+      overflow: scroll;
+      text-align: center;
+      border: 1px black solid;
+      padding: 10px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.356);
+    }
+    .deck-area img {
+      width: 75%;
+    }
+    .card-img {
+      width: 100px;
+      margin: 20px;
+    }
+    .card-img:hover {
+      box-shadow: rgb(10, 54, 8) 0 0 50px;
+    }
+    .card-img:active {
+      box-shadow: rgb(13, 54, 92) 0 0 70px;
+    }
+    .deck-card-img {
+      width: 100px;
+      margin: 20px;
+    }
+    .deck-card-img:hover {
+      box-shadow: rgb(10, 54, 8) 0 0 50px;
+    }
+    .deck-card-img:active {
+      box-shadow: rgb(13, 54, 92) 0 0 70px;
+    }
+    </style>
+    <title>QR Cards Home</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-9">
+          <h1>Build a deck</h1>
+          <div class="build-area">
+            <img class="card-img" src="https://interactive-examples.mdn.mozilla.net/media/examples/grapefruit-slice-332-332.jpg" data-id="1" alt="">
+            <img class="card-img" src="https://www.nasa.gov/sites/default/files/thumbnails/image/brazil-landburned.jpg" data-id="2" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="3" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="4" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="5" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="6" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="7" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="8" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="9" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="10" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="11" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="12" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="13" alt="">
+            <img class="card-img" src="./back_wood.png" data-id="14" alt="">
+          </div>
+        </div>
+        <div class="col-3">
+          <h1 id="deck-top">Deck (0)</h1>
+          <div class="deck-area">
+            <!-- <img class="card-img" src="./back_wood.png" data-id="" alt=""> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>
+        const allCards = [];
+        var chosenCards = [];
+        var uniqueCounter = 0;
+        $('.card-img').on('click', function(event) {
+          event.preventDefault();
+          let id = $(this).data('id');
+          let imgPath = $(this).attr('src');
+          $('.deck-area').append(`<img id="card${uniqueCounter}" class="deck-card-img" src="${imgPath}" data-id="${id}" alt="card">`);
+          const save = uniqueCounter;
+          chosenCards.push($(`#card${save}`));
+          $('#deck-top').text(`Deck (${chosenCards.length})`);
+          $(`#card${save}`).on('click', function(event) {
+            event.preventDefault();
+            let found = chosenCards.findIndex(function(element) {
+              return this === element;
+            })
+            chosenCards.splice(found, 1);
+            $(`#card${save}`).remove();
+            $('#deck-top').text(`Deck (${chosenCards.length})`);
+          });
+          uniqueCounter++;
+        });
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
