@@ -110,11 +110,15 @@ function Player() {
 };
 
 function Card(img, atk, def, ability) {
-  this.effects = [];
-  this.atk = atk;
-  this.def = def;
-  this.ability = ability;
+  // this.effects = [];
+  // this.atk = atk;
+  // this.def = def;
+  // this.ability = ability;
   this.cardSprite = {
+    effects: [],
+    atk: atk,
+    def: def,
+    ability: ability,
     // initialize position
     x: 0,
     y: 0,
@@ -130,11 +134,36 @@ function Card(img, atk, def, ability) {
     },
   
     draw: function(radians) {
-      // check if rotated and not grabbed, rotate if so
+      // handle different length numbers for atk and def, to be used in drawing text
+      let atkTextAdjust;
+      if (this.atk.toString().length > 1) {
+        atkTextAdjust = this.sprite.width * 1/50;
+      }
+      else {
+        atkTextAdjust = this.sprite.width * 1/19;
+      }
+      let defTextAdjust;
+      if (this.def.toString().length > 1) {
+        defTextAdjust = this.sprite.width * 1/50;
+      }
+      else {
+        defTextAdjust = this.sprite.width * 1/19;
+      }
+      // check if radian input given card and not grabbed, rotate if so
       if (radians !== undefined && this.grabbed === false) {
         c.translate(this.x+this.sprite.width/2,this.y+this.sprite.height/2);
         c.rotate(radians);
-        c.drawImage(this.sprite.img, -this.sprite.width/2, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12, this.sprite.width, this.sprite.height);            
+        c.drawImage(this.sprite.img, -this.sprite.width/2, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12, this.sprite.width, this.sprite.height);
+        if (this.sprite.img !== cardBack) {
+          // write atk and def if face-up
+          c.fillStyle = "#cccccc";
+          c.font = `${(this.sprite.height/8)}px Monaco`;
+          
+          // write atk
+          c.fillText(this.atk, -this.sprite.width/2 + atkTextAdjust, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12 + this.sprite.height * 27/28, this.sprite.width/6);
+          // write def
+          c.fillText(this.def, -this.sprite.width/2 + (this.sprite.width * 31/40) + defTextAdjust, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12 + this.sprite.height * 27/28, this.sprite.width/6);
+        }           
         c.rotate(-radians);
         c.translate(-(this.x+this.sprite.width/2), -(this.y+this.sprite.height/2));
       }
@@ -147,10 +176,30 @@ function Card(img, atk, def, ability) {
         c.fillStyle = "#143a0cc5";
         c.fillRect(selectedGlowX, selectedGlowY, selectedGlowWidth, selectedGlowHeight);
         c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+        if (this.sprite.img !== cardBack) {
+          // write atk and def if face-up
+          c.fillStyle = "#cccccc";
+          c.font = `${(this.sprite.height/8)}px Monaco`;
+      
+          // write atk
+          c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+          // write def
+          c.fillText(this.def, this.x + (this.sprite.width * 31/40) + defTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+        }
       }
       else {
         // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
         c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+        if (this.sprite.img !== cardBack) {
+          // write atk and def if face-up
+          c.fillStyle = "#cccccc";
+          c.font = `${(this.sprite.height/8)}px Monaco`;
+      
+          // write atk
+          c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+          // write def
+          c.fillText(this.def, this.x + (this.sprite.width * 31/40) + defTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+        }
       }
     },
     
@@ -382,8 +431,8 @@ function executeActionOnSelectedCard() {
       currentSelectedCard = playerField[i];
     }
   }
-  if (currentSelectedCard !== undefined && typeof currentGrabbedCard.ability === "function") {
-    currentGrabbedCard.ability(currentSelectedCard);
+  if (currentSelectedCard !== undefined && typeof currentGrabbedCard.cardSprite.ability === "function") {
+    currentGrabbedCard.cardSprite.ability(currentSelectedCard);
   }
 }
 function checkCardCoordinatesOfArray(array) {
