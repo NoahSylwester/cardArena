@@ -656,6 +656,7 @@ function animate() {
   // endpoint
   c.lineTo(canvas.width, canvas.height/2);
   // Make the line visible
+  c.strokeStyle = '#cccccc';
   c.stroke();
 
   // render enemy field cards
