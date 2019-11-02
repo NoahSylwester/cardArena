@@ -108,8 +108,8 @@
       <div class="row">
         <div class="col-9"></div>
         <div class="col-3" style="text-align: center;">
-          <button id="create-deck" class="btn btn-md btn-light" data-toggle="modal" data-target="#nameModal">Create deck</button>
-          <button id="back" class="btn btn-md btn-light">Back</button>
+          <button id="create-deck" class="btn btn-md btn-light" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#nameModal">Create deck</button>
+          <a href="/home"><button id="back" class="btn btn-md btn-light">Back</button></a>
         </div>
       </div>
     </div>
@@ -137,7 +137,7 @@
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script>
       // all available cards to display
         var allCards = [];
@@ -154,6 +154,8 @@
         var uniqueCounter = 0;
         // max deck size
         const maxDeckSize = 30;
+        // save deck already clicked?
+        var isNotAlreadyClicked = true;
         // event listener for cards in build area
         $('.card-img').on('click', function(event) {
           if (chosenCards.length < maxDeckSize) {
@@ -182,58 +184,56 @@
             uniqueCounter++;
           }
         });
-        $('#save-deck').on('click', function(event) {
+        $('#save-deck').on('click', function (event) {
           event.preventDefault();
-          var deckName = $('#deck-name').val().trim();
-          // fill cardIds array from chosenCards
-          for (let i = 0; i < chosenCards.length; i++) {
-            cardIds.push($(chosenCards[i]).data('id'));
-          }
-          // count number of each card id in cardIds, insert into deck object
-          for (let i = 0; i < cardIds.length; i++) {
-            console.log(cardIds)
-            var count = 1;
-            var cardId = cardIds[i];
-            if (cardIds.length !== 1) {
-              for (let j = i + 1; j < cardIds.length; j++) {
-                if (cardIds[i] === cardIds[j]) {
-                  count ++;
-                  cardIds.splice(j, 1);
-                  j = i;
-                }
+            if (isNotAlreadyClicked) {
+              // disable modal close
+              $("#create-deck").attr({"data-backdrop":"static","data-keyboard":"false"});
+              isNotAlreadyClicked = false;
+              var deckName = $('#deck-name').val().trim();
+              // fill cardIds array from chosenCards
+              for (let i = 0; i < chosenCards.length; i++) {
+                cardIds.push($(chosenCards[i]).data('id'));
               }
+              // count number of each card id in cardIds, insert into deck object
+              for (let i = 0; i < cardIds.length; i++) {
+                var count = 1;
+                var cardId = cardIds[i];
+                if (cardIds.length !== 1) {
+                  for (let j = i + 1; j < cardIds.length; j++) {
+                    if (cardIds[i] === cardIds[j]) {
+                      count++;
+                      cardIds.splice(j, 1);
+                      j = i;
+                    }
+                  }
+                }
+                cardIds.splice(i, 1);
+                deck.deckCards.push({
+                  cardId,
+                  count
+                });
+                i--;
+              }
+              deck.name = deckName;
+              // POST deck
+              $.ajax(`/api/players/${alias}/decks`, {
+                type: 'POST',
+                body: deck
+              }).then(function(err, res) {
+                // change modal content
+                if (err) {
+                  $('.modal-header').html('<h5 class="modal-title" id="nameModalLabel">An error has occurred</h5>');
+                  $('.modal-body').html(err);
+                }
+                else {
+                  $('.modal-header').html('<h5 class="modal-title" id="nameModalLabel">Your deck has been saved</h5>');
+                  $('.modal-body').html(res);
+                  $('.modal-footer').html('<a href="/home"><button class="btn btn-md btn-dark">Return home</button></a>');
+                }
+              });
             }
-            cardIds.splice(i, 1);
-            deck.deckCards.push({
-              cardId,
-              count
-            });
-            i--;
-          }
-          deck.name = deckName;
-          // POST deck
-          $.ajax(`/api/players/${alias}/decks`, {
-            type: 'POST'
-          }).then(function() {
-            // return home
-          })
-        });
-        $('#back').on('click', function(event) {
-          event.preventDefault();
-          // return home
-
-          // Send the DELETE request.
-          // $.ajax("/api/cats/" + id, {
-          //   type: "GET"
-          // }).then(
-          //   function() {
-          //     console.log("Deleted", id);
-          //     // Reload the page to get the updated list
-          //     location.reload();
-          //   }
-          // );
-
-        });
+          });
       </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
