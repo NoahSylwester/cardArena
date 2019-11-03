@@ -1,8 +1,6 @@
 /*
 end turn button
 
-place cards at point in the grid between cards correctly
-max field size, fill second row
 */
 
 // define canvas
@@ -772,3 +770,42 @@ function animate() {
 }
 
 animate();
+
+// connection to server
+var socket = io.connect('http://localhost');
+
+socket.on('connected', function (data) {
+  socket.emit('connected');
+});
+socket.on('disconnected', function (data) {
+  alert('The other player disconnected');
+});
+socket.on('grab', function (data) {
+  // assign grabbed card to be data.grabbedCard
+});
+socket.on('select', function (data) {
+  // assign grabbed card to be data.selectedCard
+});
+socket.on('use', function (data) {
+  // data.usedCard
+  // enemyHand = data.hand
+  // enemyDeck = data.deck
+  // enemyField = data.field
+  // playerHand = data.enemyHand
+  // playerField = data.enemyField
+});
+socket.on('play', function (data) {
+  // enemyHand = data.hand
+  // enemyField = data.field
+  // enemyDeck = data.deck
+  // hand: playerHand
+  // deck: playerDeck
+  // field: playerField
+});
+socket.on('draw', function (data) {
+  // enemyHand = data.hand
+  // enemyDeck = data.deck
+});
+socket.on('end', function (data) {
+
+});
