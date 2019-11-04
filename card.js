@@ -46,7 +46,7 @@ const update = function(radians) {
     this.y = cursor.y - this.sprite.height/2;
   }
 // check if selected by hover
-  if (currentGrabbedCard !== undefined) {
+  if (currentGrabbedCard !== undefined && opponent.selected === false && player.selected === false) {
     // check if selected via drag and not deck
     let check1 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 >= this.x + (this.x*0.001);
     let check2 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 <= (this.x + this.sprite.width) - (this.x + this.sprite.width)*0.001;
@@ -254,12 +254,13 @@ var enemyDeck = [];
 var playerFieldY = canvas.height * (14/20);
 var playerHandY = canvas.height * (19/20);
 var playerDeckX = canvas.width * (19/20);
+var playerZone = canvas.height * 13/16;
 // enemy zone
 var enemyFieldY = canvas.height * (6/20);
 var enemyHandY = -12;//canvas.height * (1/20);
 var enemyDeckY = canvas.height * (1/20);
 var enemyDeckX = canvas.width * (1/20);
-var enemyZone = canvas.height * 1/4;
+var enemyZone = canvas.height * 1/8;
 // buttons
 var buttonArray = [];
 
@@ -343,11 +344,12 @@ window.addEventListener('resize', function() {
   playerFieldY = canvas.height * (14/20);
   playerHandY = canvas.height * (19/20);
   playerDeckX = canvas.width * (19/20);
+  playerZone = canvas.height * 13/16;
   enemyFieldY = canvas.height * (6/20);
   enemyHandY = -12;
   enemyDeckY = canvas.height * (1/20);
   enemyDeckX = canvas.width * (1/20);
-  enemyZone = canvas.height * 1/4;
+  enemyZone = canvas.height * 1/8;
 });
 window.addEventListener('orientationchange', function() {
   canvas.width = window.innerWidth;
@@ -356,11 +358,12 @@ window.addEventListener('orientationchange', function() {
   playerFieldY = canvas.height * (14/20);
   playerHandY = canvas.height * (19/20);
   playerDeckX = canvas.width * (19/20);
+  playerZone = canvas.height * 13/16;
   enemyFieldY = canvas.height * (6/20);
   enemyHandY = -100;
   enemyDeckY = canvas.height * (1/20);
   enemyDeckX = canvas.width * (1/20);
-  enemyZone = canvas.height * 1/4;
+  enemyZone = canvas.height * 1/8;
 });
 
 // define functions to use
@@ -397,6 +400,7 @@ function Player() {
   this.hp = 25;
   this.mana = 0;
   this.draws = 7;
+  this.selected = false;
 };
 
 // card constructor
@@ -651,6 +655,16 @@ function zoomOnDoubleClickedCard() {
 canvas.addEventListener('mousemove', function(event) {
     cursor.x = event.offsetX;
     cursor.y = event.offsetY;
+    if (currentGrabbedCard !== undefined && currentGrabbedCard.cardSprite.y <= enemyZone) {
+      opponent.selected = true;
+    }
+    else if (currentGrabbedCard !== undefined && currentGrabbedCard.cardSprite.y >= playerZone) {
+      player.selected = true;
+    }
+    else {
+      player.selected = false;
+      opponent.selected = false;
+    }
 });
 canvas.addEventListener('click', function(event) {
   if (zoomedCard === undefined && isPlayerTurn) {
@@ -781,6 +795,7 @@ function animate() {
   
   requestAnimationFrame(animate);
 
+
   c.clearRect(0, 0, innerWidth, 2 * innerHeight);
   // render field lines
   c.beginPath(); 
@@ -791,6 +806,16 @@ function animate() {
   // Make the line visible
   c.strokeStyle = '#cccccc';
   c.stroke();
+
+  // animate any player targeting
+  if (opponent.selected) {
+    c.fillStyle = "#143a0c75";
+    c.fillRect(0, 0, canvas.width, canvas.height/8);
+  }
+  else if (player.selected) {
+    c.fillStyle = "#143a0c75";
+    c.fillRect(0, canvas.height * 7/8, canvas.width, canvas.height/8);
+  }
 
   // render enemy field cards
   for (let i = 0; i < enemyField.length; i++) {
