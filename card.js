@@ -1,8 +1,3 @@
-/*
-end turn button
-
-*/
-
 // define canvas
 var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
@@ -24,10 +19,150 @@ else {
   canvas.height = minCanvasHeight;
 }
 
-const cardFront = document.querySelector('#card-front');
-const cardBack = document.querySelector('#card-back');
+// functions
+const update = function(radians) {
 
-var width = canvas.width;
+  let width = canvas.width;
+  
+  // increase size if grabbed
+  if (this.grabbed) {
+    this.sprite.width = canvas.width/10 * grabSizeMultiplier;
+    this.sprite.height = (canvas.width/10) * (2000/1422) * grabSizeMultiplier;
+  }
+  else {
+    this.sprite.width = width/10;
+    this.sprite.height = (width/10) * (2000/1422);
+  }
+  
+  // track cursor
+  if (this.grabbed) {
+    this.x = cursor.x - this.sprite.width/2;
+    this.y = cursor.y - this.sprite.height/2;
+  }
+// check if selected by hover
+  if (currentGrabbedCard !== undefined) {
+    // check if selected via drag and not deck
+    let check1 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 >= this.x + (this.x*0.001);
+    let check2 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 <= (this.x + this.sprite.width) - (this.x + this.sprite.width)*0.001;
+    let check3 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 >= this.y + (this.y*0.001);
+    let check4 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 <= (this.y + this.sprite.height) - (this.y + this.sprite.height)*0.001;
+    let check5 = this !== currentGrabbedCard.cardSprite;
+    let check6 = function(arg) {
+      for (let i = 0; i < playerDeck.length; i++) {
+        if (playerDeck[i].cardSprite === arg) {
+          return false;
+        }
+      }
+      return true;
+    }(this);
+    let check7 = function(arg) {
+      for (let i = 0; i < enemyDeck.length; i++) {
+        if (enemyDeck[i].cardSprite === arg) {
+          return false;
+        }
+      }
+      return true;
+    }(this);
+    if (check1 && check2 && check3 && check4 && check5 && check6 && check7) {
+      this.selected = true;
+    }
+    else {
+      this.selected = false;
+    }
+  }
+  // un-highlights card if ability is used on it
+  else {
+    this.selected = false;
+  }
+// end check
+  // check if rotated
+  if (radians !== undefined) {
+    this.draw(radians);
+  }
+  else {
+    this.draw();
+  }
+}
+const draw = function(radians) {
+  // handle different length numbers for atk and def, to be used in drawing text
+  let atkTextAdjust;
+  if (this.atk.toString().length > 1) {
+    atkTextAdjust = this.sprite.width * 1/50;
+  }
+  else {
+    atkTextAdjust = this.sprite.width * 1/19;
+  }
+  let defTextAdjust;
+  if (this.def.toString().length > 1) {
+    defTextAdjust = this.sprite.width * 1/50;
+  }
+  else {
+    defTextAdjust = this.sprite.width * 1/19;
+  }
+  // check if radian input given card and not grabbed, rotate if so
+  if (radians !== undefined && this.grabbed === false) {
+    c.translate(this.x+this.sprite.width/2,this.y+this.sprite.height/2);
+    c.rotate(radians);
+    console.log(this.sprite);
+    c.drawImage(this.sprite.img, -this.sprite.width/2, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12, this.sprite.width, this.sprite.height);
+    if (this.sprite.img !== cardBack) {
+      // write atk and def if face-up
+      c.fillStyle = "#cccccc";
+      c.font = `${(this.sprite.height/8)}px Monaco`;
+      
+      // write atk
+      c.fillText(this.atk, -this.sprite.width/2 + atkTextAdjust, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12 + this.sprite.height * 27/28, this.sprite.width/6);
+      // write def
+      c.fillText(this.def, -this.sprite.width/2 + (this.sprite.width * 31/40) + defTextAdjust, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12 + this.sprite.height * 27/28, this.sprite.width/6);
+    }           
+    c.rotate(-radians);
+    c.translate(-(this.x+this.sprite.width/2), -(this.y+this.sprite.height/2));
+  }
+  else if (this.selected) {
+    // highlight selected card
+    let selectedGlowWidth = this.sprite.width * 15/14;
+    let selectedGlowHeight = this.sprite.height * 15/14;
+    let selectedGlowX = this.x - (selectedGlowWidth - this.sprite.width)/2;
+    let selectedGlowY = this.y - (selectedGlowHeight - this.sprite.height)/2;
+    c.fillStyle = "#143a0cc5";
+    c.fillRect(selectedGlowX, selectedGlowY, selectedGlowWidth, selectedGlowHeight);
+    c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+    if (this.sprite.img !== cardBack) {
+      // write atk and def if face-up
+      c.fillStyle = "#cccccc";
+      c.font = `${(this.sprite.height/8)}px Monaco`;
+  
+      // write atk
+      c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+      // write def
+      c.fillText(this.def, this.x + (this.sprite.width * 31/40) + defTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+    }
+  }
+  else {
+    // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
+    c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+    if (this.sprite.img !== cardBack) {
+      // write atk and def if face-up
+      c.fillStyle = "#cccccc";
+      c.font = `${(this.sprite.height/8)}px Monaco`;
+  
+      // write atk
+      c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+      // write def
+      c.fillText(this.def, this.x + (this.sprite.width * 31/40) + defTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+    }
+  }
+}
+
+// arrays of cards
+var arrayOfPlayerCards = [];
+var playerHand = [];
+var playerField = [];
+var playerDeck = [];
+var arrayOfOpponentCards = [];
+var enemyHand = [];
+var enemyField = [];
+var enemyDeck = [];
 
 // define card arena areas
 // player zone
@@ -39,6 +174,8 @@ var enemyFieldY = canvas.height * (6/20);
 var enemyHandY = -12;//canvas.height * (1/20);
 var enemyDeckY = canvas.height * (1/20);
 var enemyDeckX = canvas.width * (1/20);
+// buttons
+var buttonArray = [];
 
 // max hand size
 const maxHandSize = 7;
@@ -49,6 +186,46 @@ const handArcAngle = Math.PI/3;
 // current grabbed card
 var currentGrabbedCard;
 
+// misc variables
+var arrayOfStatusEffectImages = [];
+var currentGrabbedIndex;
+var grabSizeMultiplier = 10/9;
+var zoomedCard;
+
+// bug fix to prevent doubleclick from zooming on second card drawn from deck quickly
+var isDeckClicked = false;
+
+const cardFront = document.querySelector('#card-front');
+const cardBack = document.querySelector('#card-back');
+
+var width = canvas.width;
+
+// cursor attributes
+var cursor = {
+  
+  x: 0,
+  y: 0,
+  w: 5,
+  h: 5,
+
+
+  draw: function() {
+    
+    // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
+    
+    c.beginPath();
+    c.rect(this.x, this.y, this.w, this.h);
+    c.stroke();
+  },
+
+  update: function() {
+    // this.dx = 0; this.dy = 0;
+    this.draw();
+  }
+};
+
+
+// window events
 window.addEventListener('resize', function() {
   // reset field cards positions proportional to last position/window before resetting widths
   for (let i = 0; i < playerField.length; i++) {
@@ -97,8 +274,26 @@ window.addEventListener('orientationchange', function() {
   enemyDeckX = canvas.width * (1/20);
 });
 
-// start of card arena code
-
+// define functions to use
+// socket event functions
+function grab() {
+  socket.emit('grab', { grabbedCard: grabbedCard});
+}
+function select() {
+  socket.emit('select', { selectedCard: selectedCard});
+}
+function use() {
+  socket.emit('use', { usedCard: usedCard, hand: playerHand, deck: playerDeck, field: playerField, enemyHand: enemyHand, enemyField: enemyField});
+}
+function play() {
+  socket.emit('play', { hand: playerHand, deck: playerDeck, field: playerField});
+}
+function drawCard() {
+  socket.emit('drawCard', { hand: playerHand, deck: playerDeck});
+}
+function end() {
+  socket.emit('end');
+}
 // player stat object
 function Player() {
   this.hp = 10;
@@ -107,11 +302,9 @@ function Player() {
   this.deck = [];
 };
 
+// card constructor
 function Card(img, atk, def, ability) {
-  // this.effects = [];
-  // this.atk = atk;
-  // this.def = def;
-  // this.ability = ability;
+  // everything is within this cardSprite object
   this.cardSprite = {
     effects: [],
     atk: atk,
@@ -265,7 +458,7 @@ function Card(img, atk, def, ability) {
     }
   };
 };
-
+// button constructor
 function Button(text, img, id, x, y, func) {
   this.effect = func;
   
@@ -313,6 +506,7 @@ function Button(text, img, id, x, y, func) {
   };
 };
 
+// clientside action functions
 function clickDeck(array) {
   // draw a card
   if (cursor.x >= array[array.length-1].cardSprite.x && cursor.x <= array[array.length-1].cardSprite.x + array[array.length-1].cardSprite.sprite.width
@@ -327,7 +521,6 @@ function clickDeck(array) {
       isDeckClicked = true;
     }
 }
-
 function mouseDownIteration(array) {
   for (let i = array.length-1; i >= 0; i--) {
     if (cursor.x >= array[i].cardSprite.x && cursor.x <= array[i].cardSprite.x + array[i].cardSprite.sprite.width
@@ -369,18 +562,23 @@ function mouseUpIteration(array) {
       var temp = array[currentGrabbedIndex];
       array.splice(currentGrabbedIndex,1);
       // insert cards onto field in location specified by player
-      for (let i = 0; i < playerField.length; i++) {
-        if (i === 0 && temp.cardSprite.x <= playerField[i].cardSprite.x) {
-          playerField.unshift(temp);
-          break;
-        }
-        else if (i === playerField.length - 1 && temp.cardSprite.x > playerField[i].cardSprite.x) {
-          playerField.push(temp);
-          break;
-        }
-        else if (temp.cardSprite.x > playerField[i].cardSprite.x && temp.cardSprite.x <= playerField[i + 1].cardSprite.x) {
-          playerField.splice(i + 1, 0, temp);
-          break;
+      if (playerField.length === 0) {
+        playerField.push(temp);
+      }
+      else {
+        for (let i = 0; i < playerField.length; i++) {
+          if (i === 0 && temp.cardSprite.x <= playerField[i].cardSprite.x) {
+            playerField.unshift(temp);
+            break;
+          }
+          else if (i === playerField.length - 1 && temp.cardSprite.x > playerField[i].cardSprite.x) {
+            playerField.push(temp);
+            break;
+          }
+          else if (temp.cardSprite.x > playerField[i].cardSprite.x && temp.cardSprite.x <= playerField[i + 1].cardSprite.x) {
+            playerField.splice(i + 1, 0, temp);
+            break;
+          }
         }
       }
     }
@@ -467,50 +665,7 @@ function zoomOnDoubleClickedCard() {
   checkCardCoordinatesOfArray(enemyField);
 }
 
-
-// arrays of cards
-var arrayOfPlayerCards = [];
-var playerHand = [];
-var playerField = [];
-var playerDeck = [];
-var arrayOfOpponentCards = [];
-var enemyHand = [];
-var enemyField = [];
-var enemyDeck = [];
-
-// misc variables
-var arrayOfStatusEffectImages = [];
-var currentGrabbedIndex;
-var grabSizeMultiplier = 10/9;
-var zoomedCard;
-// bug fix to prevent doubleclick from zooming on second card drawn from deck quickly
-var isDeckClicked = false;
-
-// cursor attributes
-var cursor = {
-  
-  x: 0,
-  y: 0,
-  w: 5,
-  h: 5,
-
-
-  draw: function() {
-    
-    // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
-    
-    c.beginPath();
-    c.rect(this.x, this.y, this.w, this.h);
-    c.stroke();
-  },
-
-  update: function() {
-    // this.dx = 0; this.dy = 0;
-    this.draw();
-  }
-};
-
-// desktop mouse functions
+// desktop mouse events
 canvas.addEventListener('mousemove', function(event) {
     cursor.x = event.offsetX;
     cursor.y = event.offsetY;
@@ -552,7 +707,7 @@ canvas.addEventListener('dblclick', function(event) {
   }
 });
 
-// mobile touch functions
+// mobile touch events (not currently functional)
 canvas.addEventListener('touchmove', function(event){
   event.preventDefault();
   cursor.x = event.offsetX;
@@ -579,27 +734,27 @@ canvas.addEventListener('touchend', function(event) {
 
 
 // create some cards
-arrayOfPlayerCards.push(new Card(cardFront,0,0,0));
-arrayOfPlayerCards.push(new Card(cardFront,1,0,0));
-arrayOfPlayerCards.push(new Card(cardFront,2,0,0));
-arrayOfPlayerCards.push(new Card(cardFront,3,0,0));
-arrayOfPlayerCards.push(new Card(cardFront,4,0,0));
+// arrayOfPlayerCards.push(new Card(cardFront,0,0,0));
+// arrayOfPlayerCards.push(new Card(cardFront,1,0,0));
+// arrayOfPlayerCards.push(new Card(cardFront,2,0,0));
+// arrayOfPlayerCards.push(new Card(cardFront,3,0,0));
+// arrayOfPlayerCards.push(new Card(cardFront,4,0,0));
 
-playerHand.push(new Card(cardFront,0,0,0));
-playerHand.push(new Card(cardBack,0,0,0));
-playerHand.push(new Card(cardFront,0,0,0));
-playerHand.push(new Card(cardFront,0,0,0));
-playerHand.push(new Card(cardBack,0,0,0));
-playerHand.push(new Card(cardFront,0,0,0));
-playerHand.push(new Card(cardFront,0,0,0));
+// playerHand.push(new Card(cardFront,0,0,0));
+// playerHand.push(new Card(cardBack,0,0,0));
+// playerHand.push(new Card(cardFront,0,0,0));
+// playerHand.push(new Card(cardFront,0,0,0));
+// playerHand.push(new Card(cardBack,0,0,0));
+// playerHand.push(new Card(cardFront,0,0,0));
+// playerHand.push(new Card(cardFront,0,0,0));
 
-enemyHand.push(new Card(cardFront,0,0,0));
-enemyHand.push(new Card(cardFront,0,0,0));
-enemyHand.push(new Card(cardFront,0,0,0));
-enemyHand.push(new Card(cardFront,0,0,0));
-enemyHand.push(new Card(cardFront,0,0,0));
-enemyHand.push(new Card(cardFront,0,0,0));
-enemyHand.push(new Card(cardFront,0,0,0));
+// enemyHand.push(new Card(cardFront,0,0,0));
+// enemyHand.push(new Card(cardFront,0,0,0));
+// enemyHand.push(new Card(cardFront,0,0,0));
+// enemyHand.push(new Card(cardFront,0,0,0));
+// enemyHand.push(new Card(cardFront,0,0,0));
+// enemyHand.push(new Card(cardFront,0,0,0));
+// enemyHand.push(new Card(cardFront,0,0,0));
 
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
@@ -617,31 +772,31 @@ playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 
-enemyDeck.push(new Card(cardBack,0,0,0));
-enemyDeck.push(new Card(cardBack,0,0,0));
-enemyDeck.push(new Card(cardBack,0,0,0));
-enemyDeck.push(new Card(cardBack,0,0,0));
-enemyDeck.push(new Card(cardBack,0,0,0));
-enemyDeck.push(new Card(cardBack,0,0,0));
-enemyDeck.push(new Card(cardBack,0,0,0));
-enemyDeck.push(new Card(cardBack,0,0,0));
-enemyDeck.push(new Card(cardBack,0,0,0));
-enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
+// enemyDeck.push(new Card(cardBack,0,0,0));
 
-enemyField.push(new Card(cardBack,0,0,0));
-enemyField.push(new Card(cardBack,0,0,0));
-enemyField.push(new Card(cardBack,0,0,0));
-enemyField.push(new Card(cardBack,0,0,0));
-playerField.push(new Card(cardBack,0,0,function(card) {alert('ability!')}));
+// enemyField.push(new Card(cardBack,0,0,0));
+// enemyField.push(new Card(cardBack,0,0,0));
+// enemyField.push(new Card(cardBack,0,0,0));
+// enemyField.push(new Card(cardBack,0,0,0));
+// playerField.push(new Card(cardBack,0,0,function(card) {alert('ability!')}));
 
 var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, function() {console.log('End')});
 var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50, function() {console.log('Attack')});
 var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50, function() {console.log('Ability')});
 
 
-var buttonArray = [];
 buttonArray.push(endButton, attackButton, abilityButton);
 
+// final animation loop function
 function animate() {
   
   requestAnimationFrame(animate);
@@ -768,17 +923,29 @@ function animate() {
   }
   isDeckClicked = false;
 }
-
 animate();
+
 
 // connection to server
 var socket = io.connect('http://localhost');
 
 socket.on('connected', function (data) {
-  socket.emit('connected');
+  socket.emit('connected', { deck: playerDeck });
 });
 socket.on('disconnected', function (data) {
   alert('The other player disconnected');
+});
+socket.on('initialize deck', function(data) {
+  socket.emit('initialize deck', { deck: playerDeck });
+});
+socket.on('opponent deck', function(data) {
+  enemyDeck = data.deck;
+  for (let i = 0; i < enemyDeck.length; i++) {
+    enemyDeck[i].cardSprite.draw = draw;
+    enemyDeck[i].cardSprite.update = update;
+    enemyDeck[i].cardSprite.sprite.img = cardBack;
+  };
+  console.log(enemyDeck);
 });
 socket.on('grab', function (data) {
   // assign grabbed card to be data.grabbedCard
@@ -802,10 +969,16 @@ socket.on('play', function (data) {
   // deck: playerDeck
   // field: playerField
 });
-socket.on('draw', function (data) {
+socket.on('drawCard', function (data) {
   // enemyHand = data.hand
   // enemyDeck = data.deck
 });
 socket.on('end', function (data) {
 
 });
+//received server events
+// highlights grabbed card
+// highlights selected card(diff color)
+// executing action (maybe showing used card for a second)
+// updating hand/field/deck arrays
+// sending turn change flag
