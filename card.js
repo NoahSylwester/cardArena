@@ -1,3 +1,6 @@
+// initialize random card id value
+var cardId = Math.random();
+
 // define canvas
 var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
@@ -65,6 +68,8 @@ const update = function(radians) {
     }(this);
     if (check1 && check2 && check3 && check4 && check5 && check6 && check7) {
       this.selected = true;
+      unselect();
+      select(this);
     }
     else {
       this.selected = false;
@@ -137,6 +142,46 @@ const draw = function(radians) {
       c.fillText(this.def, this.x + (this.sprite.width * 31/40) + defTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
     }
   }
+  else if (this.enemyGrabbed) {
+    // highlight selected card
+    let selectedGlowWidth = this.sprite.width * 15/14;
+    let selectedGlowHeight = this.sprite.height * 15/14;
+    let selectedGlowX = this.x - (selectedGlowWidth - this.sprite.width)/2;
+    let selectedGlowY = this.y - (selectedGlowHeight - this.sprite.height)/2;
+    c.fillStyle = "#12328a";
+    c.fillRect(selectedGlowX, selectedGlowY, selectedGlowWidth, selectedGlowHeight);
+    c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+    if (this.sprite.img !== cardBack) {
+      // write atk and def if face-up
+      c.fillStyle = "#cccccc";
+      c.font = `${(this.sprite.height/8)}px Monaco`;
+  
+      // write atk
+      c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+      // write def
+      c.fillText(this.def, this.x + (this.sprite.width * 31/40) + defTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+    }
+  }
+  else if (this.enemySelected) {
+    // highlight selected card
+    let selectedGlowWidth = this.sprite.width * 15/14;
+    let selectedGlowHeight = this.sprite.height * 15/14;
+    let selectedGlowX = this.x - (selectedGlowWidth - this.sprite.width)/2;
+    let selectedGlowY = this.y - (selectedGlowHeight - this.sprite.height)/2;
+    c.fillStyle = "#7119ac";
+    c.fillRect(selectedGlowX, selectedGlowY, selectedGlowWidth, selectedGlowHeight);
+    c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
+    if (this.sprite.img !== cardBack) {
+      // write atk and def if face-up
+      c.fillStyle = "#cccccc";
+      c.font = `${(this.sprite.height/8)}px Monaco`;
+  
+      // write atk
+      c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+      // write def
+      c.fillText(this.def, this.x + (this.sprite.width * 31/40) + defTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
+    }
+  }
   else {
     // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
     c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
@@ -152,7 +197,9 @@ const draw = function(radians) {
     }
   }
 }
+
 const parseCards = function(array, img) {
+  // necessary to re-add functions and img to cards after they go through the server
   for (let i = 0; i < array.length; i++) {
     // adds canvas functions
     array[i].cardSprite.draw = draw;
@@ -199,6 +246,7 @@ var arrayOfStatusEffectImages = [];
 var currentGrabbedIndex;
 var grabSizeMultiplier = 10/9;
 var zoomedCard;
+var enemyUsedCard;
 
 // bug fix to prevent doubleclick from zooming on second card drawn from deck quickly
 var isDeckClicked = false;
@@ -284,11 +332,19 @@ window.addEventListener('orientationchange', function() {
 
 // define functions to use
 // socket event functions
-function grab() {
-  socket.emit('grab', { grabbedCard: currentGrabbedCard});
+function grab(boolean) {
+  if (boolean) {
+    socket.emit('grab', { grabbedCard: currentGrabbedCard});
+  }
+  else {
+    socket.emit('release');
+  }
 }
-function select() {
-  socket.emit('select', { selectedCard: currentSelectedCard});
+function select(cardSprite) {
+  socket.emit('select', { selectedCardSprite: cardSprite});
+}
+function unselect() {
+  socket.emit('unselect');
 }
 function use() {
   socket.emit('use', { usedCard: usedCard, hand: playerHand, deck: playerDeck, field: playerField, enemyHand: enemyHand, enemyField: enemyField});
@@ -314,6 +370,8 @@ function Player() {
 function Card(img, atk, def, ability) {
   // everything is within this cardSprite object
   this.cardSprite = {
+    // initialize easy-to-verify id
+    id: ++cardId,
     effects: [],
     atk: atk,
     def: def,
@@ -325,6 +383,8 @@ function Card(img, atk, def, ability) {
     dy: 0,
     grabbed: false,
     selected: false,
+    enemyGrabbed: false,
+    enemySelected: false,
 
     sprite: {
       img: img,
@@ -332,138 +392,9 @@ function Card(img, atk, def, ability) {
       height: (canvas.width/10) * (2000/1422)
     },
   
-    draw: function(radians) {
-      // handle different length numbers for atk and def, to be used in drawing text
-      let atkTextAdjust;
-      if (this.atk.toString().length > 1) {
-        atkTextAdjust = this.sprite.width * 1/50;
-      }
-      else {
-        atkTextAdjust = this.sprite.width * 1/19;
-      }
-      let defTextAdjust;
-      if (this.def.toString().length > 1) {
-        defTextAdjust = this.sprite.width * 1/50;
-      }
-      else {
-        defTextAdjust = this.sprite.width * 1/19;
-      }
-      // check if radian input given card and not grabbed, rotate if so
-      if (radians !== undefined && this.grabbed === false) {
-        c.translate(this.x+this.sprite.width/2,this.y+this.sprite.height/2);
-        c.rotate(radians);
-        c.drawImage(this.sprite.img, -this.sprite.width/2, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12, this.sprite.width, this.sprite.height);
-        if (this.sprite.img !== cardBack) {
-          // write atk and def if face-up
-          c.fillStyle = "#cccccc";
-          c.font = `${(this.sprite.height/8)}px Monaco`;
-          
-          // write atk
-          c.fillText(this.atk, -this.sprite.width/2 + atkTextAdjust, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12 + this.sprite.height * 27/28, this.sprite.width/6);
-          // write def
-          c.fillText(this.def, -this.sprite.width/2 + (this.sprite.width * 31/40) + defTextAdjust, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12 + this.sprite.height * 27/28, this.sprite.width/6);
-        }           
-        c.rotate(-radians);
-        c.translate(-(this.x+this.sprite.width/2), -(this.y+this.sprite.height/2));
-      }
-      else if (this.selected) {
-        // highlight selected card
-        let selectedGlowWidth = this.sprite.width * 15/14;
-        let selectedGlowHeight = this.sprite.height * 15/14;
-        let selectedGlowX = this.x - (selectedGlowWidth - this.sprite.width)/2;
-        let selectedGlowY = this.y - (selectedGlowHeight - this.sprite.height)/2;
-        c.fillStyle = "#143a0cc5";
-        c.fillRect(selectedGlowX, selectedGlowY, selectedGlowWidth, selectedGlowHeight);
-        c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
-        if (this.sprite.img !== cardBack) {
-          // write atk and def if face-up
-          c.fillStyle = "#cccccc";
-          c.font = `${(this.sprite.height/8)}px Monaco`;
-      
-          // write atk
-          c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
-          // write def
-          c.fillText(this.def, this.x + (this.sprite.width * 31/40) + defTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
-        }
-      }
-      else {
-        // context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
-        c.drawImage(this.sprite.img, this.x, this.y, this.sprite.width, this.sprite.height);
-        if (this.sprite.img !== cardBack) {
-          // write atk and def if face-up
-          c.fillStyle = "#cccccc";
-          c.font = `${(this.sprite.height/8)}px Monaco`;
-      
-          // write atk
-          c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
-          // write def
-          c.fillText(this.def, this.x + (this.sprite.width * 31/40) + defTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
-        }
-      }
-    },
+    draw: draw,
     
-    update: function(radians) {
-      let width = canvas.width;
-      
-      // increase size if grabbed
-      if (this.grabbed) {
-        this.sprite.width = width/10 * grabSizeMultiplier;
-        this.sprite.height = (width/10) * (2000/1422) * grabSizeMultiplier;
-      }
-      else {
-        this.sprite.width = width/10;
-        this.sprite.height = (width/10) * (2000/1422);
-      }
-      
-      // track cursor
-      if (this.grabbed) {
-        this.x = cursor.x - this.sprite.width/2;
-        this.y = cursor.y - this.sprite.height/2;
-      }
-// check if selected by hover
-      if (currentGrabbedCard !== undefined) {
-        // check if selected via drag and not deck
-        let check1 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 >= this.x + (this.x*0.001);
-        let check2 = currentGrabbedCard.cardSprite.x + currentGrabbedCard.cardSprite.sprite.width/2 <= (this.x + this.sprite.width) - (this.x + this.sprite.width)*0.001;
-        let check3 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 >= this.y + (this.y*0.001);
-        let check4 = currentGrabbedCard.cardSprite.y + currentGrabbedCard.cardSprite.sprite.height/6 <= (this.y + this.sprite.height) - (this.y + this.sprite.height)*0.001;
-        let check5 = this !== currentGrabbedCard.cardSprite;
-        let check6 = function(arg) {
-          for (let i = 0; i < playerDeck.length; i++) {
-            if (playerDeck[i].cardSprite === arg) {
-              return false;
-            }
-          }
-          return true;
-        }(this);
-        let check7 = function(arg) {
-          for (let i = 0; i < enemyDeck.length; i++) {
-            if (enemyDeck[i].cardSprite === arg) {
-              return false;
-            }
-          }
-          return true;
-        }(this);
-        if (check1 && check2 && check3 && check4 && check5 && check6 && check7) {
-          this.selected = true;
-        }
-        else {
-          this.selected = false;
-        }
-      }
-      // un-highlights card if ability is used on it
-      else {
-        this.selected = false;
-      }
-// end check
-      // check if rotated
-      if (radians !== undefined) {
-        this.draw(radians);
-      }
-      else {
-        this.draw();
-      }
-    }
+    update: update
   };
 };
 // button constructor
@@ -537,7 +468,7 @@ function mouseDownIteration(array) {
         
         array[i].cardSprite.grabbed = true;
         currentGrabbedCard = array[i];
-        grab();
+        grab(true);
 
         // bug fix
         array[i].cardSprite.x = cursor.x - array[i].cardSprite.sprite.width/2;
@@ -593,6 +524,11 @@ function mouseUpIteration(array) {
       }
       play();
     }
+    if (currentGrabbedCard !== undefined) {
+      // release grab
+      grab(false);
+      console.log('release');
+    }
     // forget what's been grabbed
     currentGrabbedCard = undefined;
     currentGrabbedIndex = undefined;
@@ -631,13 +567,11 @@ function executeActionOnSelectedCard() {
   for (let i = 0; i < enemyField.length; i++) {
     if (enemyField[i].cardSprite.selected) {
       currentSelectedCard = enemyField[i];
-      select();
     }
   }
   for (let i = 0; i < playerField.length; i++) {
     if (playerField[i].cardSprite.selected) {
       currentSelectedCard = playerField[i];
-      select();
     }
   }
   if (currentSelectedCard !== undefined && typeof currentGrabbedCard.cardSprite.ability === "function") {
@@ -802,12 +736,12 @@ playerDeck.push(new Card(cardBack,0,0,0));
 // enemyField.push(new Card(cardBack,0,0,0));
 // playerField.push(new Card(cardBack,0,0,function(card) {alert('ability!')}));
 
-var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, function() {console.log('End')});
-var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50, function() {console.log('Attack')});
-var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50, function() {console.log('Ability')});
+var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, function() {end()});
+// var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50, function() {console.log('Attack')});
+// var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50, function() {console.log('Ability')});
 
 
-buttonArray.push(endButton, attackButton, abilityButton);
+buttonArray.push(endButton);//, attackButton, abilityButton);
 
 // final animation loop function
 function animate() {
@@ -956,20 +890,75 @@ socket.on('opponent deck', function(data) {
   parseCards(enemyDeck, cardBack);
 });
 socket.on('grab', function (data) {
-  // assign grabbed card to be data.grabbedCard
-  console.log('grab', data);
+  for (let i = 0; i < enemyHand.length; i++) {
+    if (enemyHand[i].cardSprite.id === data.grabbedCard.cardSprite.id) {
+      enemyHand[i].cardSprite.enemyGrabbed = true;
+    }
+  }
+  for (let i = 0; i < enemyField.length; i++) {
+    if (enemyField[i].cardSprite.id === data.grabbedCard.cardSprite.id) {
+      enemyField[i].cardSprite.enemyGrabbed = true;
+    }
+  }
+});
+socket.on('release', function () {
+  for (let i = 0; i < enemyHand.length; i++) {
+    enemyHand[i].cardSprite.enemyGrabbed = false;
+    enemyHand[i].cardSprite.enemySelected = false;
+  }
+  for (let i = 0; i < enemyField.length; i++) {
+    enemyField[i].cardSprite.enemyGrabbed = false;
+    enemyField[i].cardSprite.enemySelected = false;
+  }
+  for (let i = 0; i < playerField.length; i++) {
+    playerField[i].cardSprite.enemySelected = false;
+  }
 });
 socket.on('select', function (data) {
   // assign grabbed card to be data.selectedCard
-  console.log('select', data);
+  for (let i = 0; i < enemyHand.length; i++) {
+    if (enemyHand[i].cardSprite.id === data.selectedCardSprite.id) {
+      enemyHand[i].cardSprite.enemySelected = true;
+    }
+  }
+  for (let i = 0; i < enemyField.length; i++) {
+    if (enemyField[i].cardSprite.id === data.selectedCardSprite.id) {
+      enemyField[i].cardSprite.enemySelected = true;
+    }
+  }
+  for (let i = 0; i < playerField.length; i++) {
+    if (playerField[i].cardSprite.id === data.selectedCardSprite.id) {
+      playerField[i].cardSprite.enemySelected = true;
+    }
+  }
+});
+socket.on('unselect', function () {
+  for (let i = 0; i < enemyHand.length; i++) {
+    enemyHand[i].cardSprite.enemySelected = false;
+  }
+  for (let i = 0; i < enemyField.length; i++) {
+    enemyField[i].cardSprite.enemySelected = false;
+  }
+  for (let i = 0; i < playerField.length; i++) {
+    playerField[i].cardSprite.enemySelected = false;
+  }
 });
 socket.on('use', function (data) {
-  // data.usedCard
-  // enemyHand = data.hand
-  // enemyDeck = data.deck
-  // enemyField = data.field
-  // playerHand = data.enemyHand
-  // playerField = data.enemyField
+  enemyUsedCard = data.usedCard;
+  enemyUsedCard.cardSprite.update = update;
+  enemyUsedCard.cardSprite.draw = draw;
+  enemyUsedCard.cardSprite.sprite.img = cardFront;
+  // update arrays
+  enemyHand = data.hand;
+  enemyDeck = data.deck;
+  enemyField = data.field;
+  playerHand = data.enemyHand;
+  playerField = data.enemyField;
+  parseCards(enemyHand, cardBack);
+  parseCards(enemyDeck, cardBack);
+  parseCards(enemyField, cardFront);
+  parseCards(playerHand, cardFront);
+  parseCards(playerField, cardFront);
 });
 socket.on('play', function (data) {
   enemyHand = data.hand
@@ -978,10 +967,6 @@ socket.on('play', function (data) {
   parseCards(enemyHand, cardBack);
   parseCards(enemyDeck, cardBack);
   parseCards(enemyField, cardFront);
-  // hand: playerHand
-  // deck: playerDeck
-  // field: playerField
-  console.log('play', data);
 });
 socket.on('drawCard', function (data) {
   enemyHand = data.hand;

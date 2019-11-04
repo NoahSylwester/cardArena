@@ -42,8 +42,14 @@ io.on('connection', function(socket){
     socket.on('grab', function(data){
       socket.broadcast.to(storedId).emit('grab', data);
     });
+    socket.on('release', function(data){
+      socket.broadcast.to(storedId).emit('release');
+    });
     socket.on('select', function(data){
       socket.broadcast.to(storedId).emit('select', data);      
+    });
+    socket.on('unselect', function(data){
+      socket.broadcast.to(storedId).emit('unselect');      
     });
     socket.on('use', function(data){
       socket.broadcast.to(storedId).emit('use', data);      
@@ -55,7 +61,8 @@ io.on('connection', function(socket){
       socket.broadcast.to(storedId).emit('drawCard', data);      
     });
     socket.on('end', function(data){
-      socket.broadcast.to(storedId).emit('end');  
+      socket.broadcast.to(storedId).emit('end'); 
+      console.log('end turn');
     });
     socket.on('disconnect', function() {
       io.to(storedId).emit('disconnected');
@@ -80,8 +87,14 @@ io.on('connection', function(socket){
     socket.on('grab', function(data){
       socket.broadcast.to(storedId).emit('grab', data);
     });
+    socket.on('release', function(data){
+      socket.broadcast.to(storedId).emit('release');
+    });
     socket.on('select', function(data){
       socket.broadcast.to(storedId).emit('select', data);      
+    });
+    socket.on('unselect', function(data){
+      socket.broadcast.to(storedId).emit('unselect');      
     });
     socket.on('use', function(data){
       socket.broadcast.to(storedId).emit('use', data);      
@@ -93,7 +106,8 @@ io.on('connection', function(socket){
       socket.broadcast.to(storedId).emit('drawCard', data);      
     });
     socket.on('end', function(data){
-      socket.broadcast.to(storedId).emit('end');  
+      socket.broadcast.to(storedId).emit('end');
+      console.log('end turn');
     });
     socket.on('disconnect', function() {
       io.to(storedId).emit('disconnected');
