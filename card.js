@@ -1,6 +1,9 @@
 // initialize random card id value
 var cardId = Math.random();
 
+// player turn boolean
+var isPlayerTurn = false;
+
 // define canvas
 var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
@@ -618,7 +621,7 @@ canvas.addEventListener('mousemove', function(event) {
     cursor.y = event.offsetY;
 });
 canvas.addEventListener('click', function(event) {
-  if (zoomedCard === undefined) {
+  if (zoomedCard === undefined && isPlayerTurn) {
     clickDeck(playerDeck);
   }
   else {
@@ -627,24 +630,28 @@ canvas.addEventListener('click', function(event) {
   }
 });
 canvas.addEventListener('mousedown', function(event) {
-  if (zoomedCard === undefined) {
-    checkForButtonPush();
-    mouseDownIteration(arrayOfPlayerCards);
-    if (currentGrabbedIndex === undefined) {
-      mouseDownIteration(playerHand);
+  if (isPlayerTurn) {
+    if (zoomedCard === undefined) {
+      checkForButtonPush();
+      mouseDownIteration(arrayOfPlayerCards);
       if (currentGrabbedIndex === undefined) {
-        mouseDownIteration(playerField);
+        mouseDownIteration(playerHand);
+        if (currentGrabbedIndex === undefined) {
+          mouseDownIteration(playerField);
+        }
       }
     }
   }
 });
 canvas.addEventListener('mouseup', function(event) {
-  if (zoomedCard === undefined) {
-    releaseAnyPushedButton();
-    executeActionOnSelectedCard();
-    mouseUpIteration(arrayOfPlayerCards);
-    mouseUpIteration(playerHand);
-    mouseUpIteration(playerField);
+  if (isPlayerTurn) {
+    if (zoomedCard === undefined) {
+      releaseAnyPushedButton();
+      executeActionOnSelectedCard();
+      mouseUpIteration(arrayOfPlayerCards);
+      mouseUpIteration(playerHand);
+      mouseUpIteration(playerField);
+    }
   }
 });
 canvas.addEventListener('dblclick', function(event) {
@@ -977,9 +984,4 @@ socket.on('drawCard', function (data) {
 socket.on('end', function (data) {
 
 });
-//received server events
-// highlights grabbed card
-// highlights selected card(diff color)
-// executing action (maybe showing used card for a second)
-// updating hand/field/deck arrays
-// sending turn change flag
+
