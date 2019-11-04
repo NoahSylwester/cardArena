@@ -14,8 +14,8 @@ server tests for wins/loses
 // initialize random card id value
 var cardId = Math.random();
 
-// player turn boolean
-var isPlayerTurn = false;
+// player turn boolean (false until changed by the server)
+var isPlayerTurn = true;
 
 // define canvas
 var canvas = document.querySelector('canvas');
@@ -294,7 +294,7 @@ var currentGrabbedIndex;
 var grabSizeMultiplier = 10/9;
 var zoomedCard;
 var enemyUsedCard;
-var battleMenuFlag = true;
+var isBattleMenuOpen = true;
 
 // bug fix to prevent doubleclick from zooming on second card drawn from deck quickly
 var isDeckClicked = false;
@@ -608,6 +608,14 @@ function checkForButtonPush() {
         break;
       }
   }
+  for (let i = 0; i < menuButtons.length; i++) {
+    if (cursor.x >= menuButtons[i].buttonSprite.x && cursor.x <= menuButtons[i].buttonSprite.x + menuButtons[i].buttonSprite.sprite.width
+      && cursor.y >= menuButtons[i].buttonSprite.y && cursor.y <= menuButtons[i].buttonSprite.y + menuButtons[i].buttonSprite.sprite.height) {
+
+        menuButtons[i].buttonSprite.pushed = true;
+        break;
+      }
+  }
 };
 function releaseAnyPushedButton() {
   // execute button effect if cursor released still on button
@@ -621,6 +629,19 @@ function releaseAnyPushedButton() {
     }
      else if (buttonArray[i].buttonSprite.pushed === true) {
       buttonArray[i].buttonSprite.pushed = false;
+      break;
+    }
+  }
+  for (let i = 0; i < menuButtons.length; i++) {
+    if (menuButtons[i].buttonSprite.pushed === true && (cursor.x >= menuButtons[i].buttonSprite.x && cursor.x <= menuButtons[i].buttonSprite.x + menuButtons[i].buttonSprite.sprite.width
+      && cursor.y >= menuButtons[i].buttonSprite.y && cursor.y <= menuButtons[i].buttonSprite.y + menuButtons[i].buttonSprite.sprite.height)) {
+      
+        menuButtons[i].buttonSprite.pushed = false;
+        menuButtons[i].effect()
+        break;
+    }
+     else if (menuButtons[i].buttonSprite.pushed === true) {
+      menuButtons[i].buttonSprite.pushed = false;
       break;
     }
   }
@@ -923,7 +944,7 @@ function animate() {
     playerHand[i].cardSprite.update(radians);
   }
   // bring up attack/ability confirm
-  if (battleMenuFlag) {
+  if (isBattleMenuOpen) {
     c.fillStyle = "#cccccc";
     let menuWidth = canvas.width/3;
     let menuHeight = 100;
@@ -931,6 +952,7 @@ function animate() {
     let menuY = (canvas.height - menuHeight)/2;
     c.fillRect(menuX, menuY, menuWidth, menuHeight);
     c.fillStyle = "#000000";
+    c.font = `${(menuX/17)}px Monaco`;
     c.fillText('Select an action', menuX + menuWidth * 21/100, menuY + 25, canvas.width/3);
     // let buttonSpacing = 0;canvas.height/40;
     for (let i = 0; i < menuButtons.length; i++) {
