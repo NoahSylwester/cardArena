@@ -1,3 +1,14 @@
+/*
+still to do:
+use card event
+show card on use
+offer opportunity to use ability
+
+cost implementation
+
+server tests for wins/loses
+*/
+
 // initialize random card id value
 var cardId = Math.random();
 
@@ -539,29 +550,34 @@ function mouseUpIteration(array) {
     // check if playing cards from hand
       // check if anything selected, if dragged card is from hand, if few enough cards in field, and if dragged to field area
     if (!checkIfAnySelectedCards() && array === playerHand && playerField.length < maxFieldSize && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= canvas.height/2) {
-      var temp = array[currentGrabbedIndex];
-      array.splice(currentGrabbedIndex,1);
-      // insert cards onto field in location specified by player
-      if (playerField.length === 0) {
-        playerField.push(temp);
-      }
-      else {
-        for (let i = 0; i < playerField.length; i++) {
-          if (i === 0 && temp.cardSprite.x <= playerField[i].cardSprite.x) {
-            playerField.unshift(temp);
-            break;
-          }
-          else if (i === playerField.length - 1 && temp.cardSprite.x > playerField[i].cardSprite.x) {
-            playerField.push(temp);
-            break;
-          }
-          else if (temp.cardSprite.x > playerField[i].cardSprite.x && temp.cardSprite.x <= playerField[i + 1].cardSprite.x) {
-            playerField.splice(i + 1, 0, temp);
-            break;
+      if (array[currentGrabbedIndex].cardSprite.cost <= player.mana) {
+        var temp = array[currentGrabbedIndex];
+        array.splice(currentGrabbedIndex,1);
+        // insert cards onto field in location specified by player
+        if (playerField.length === 0) {
+          playerField.push(temp);
+        }
+        else {
+          for (let i = 0; i < playerField.length; i++) {
+            if (i === 0 && temp.cardSprite.x <= playerField[i].cardSprite.x) {
+              playerField.unshift(temp);
+              break;
+            }
+            else if (i === playerField.length - 1 && temp.cardSprite.x > playerField[i].cardSprite.x) {
+              playerField.push(temp);
+              break;
+            }
+            else if (temp.cardSprite.x > playerField[i].cardSprite.x && temp.cardSprite.x <= playerField[i + 1].cardSprite.x) {
+              playerField.splice(i + 1, 0, temp);
+              break;
+            }
           }
         }
+        play();
       }
-      play();
+      else {
+        alert('Not enough mana');
+      }
     }
     if (currentGrabbedCard !== undefined) {
       // release grab
@@ -769,6 +785,7 @@ playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0,1));
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
@@ -778,8 +795,7 @@ playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
 playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0,1));
 
 playerField.push(new Card(cardFront,0,0,function(card) {alert('ability!')}));
 
