@@ -786,7 +786,7 @@ function animate() {
     enemyDeck[i].cardSprite.update();
   }
   // render buttons
-  let buttonSpacing = canvas.height/40;
+  let buttonSpacing = 0;canvas.height/40;
   for (let i = 0; i < buttonArray.length; i++) {
     buttonArray[i].buttonSprite.y = canvas.height/2 - (buttonArray.length*(buttonArray[i].buttonSprite.sprite.height + buttonSpacing*(3/4))/2) + (i * (buttonArray[i].buttonSprite.sprite.height + buttonSpacing));
     buttonArray[i].buttonSprite.update();
