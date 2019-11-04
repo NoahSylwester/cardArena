@@ -83,6 +83,8 @@ io.on('connection', function(socket){
     });
     socket.on('initialize deck', function(data) {
       socket.broadcast.to(storedId).emit('opponent deck', { deck: data.deck });
+      // switch player 1's turn boolean to true
+      socket.broadcast.to(storedId).emit('end');
     })
     socket.on('grab', function(data){
       socket.broadcast.to(storedId).emit('grab', data);

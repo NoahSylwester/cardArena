@@ -359,6 +359,7 @@ function drawCard() {
   socket.emit('drawCard', { hand: playerHand, deck: playerDeck});
 }
 function end() {
+  isPlayerTurn = false;
   socket.emit('end');
 }
 // player stat object
@@ -982,6 +983,6 @@ socket.on('drawCard', function (data) {
   parseCards(enemyDeck, cardBack);
 });
 socket.on('end', function (data) {
-
+  isPlayerTurn = true;
 });
 
