@@ -40,19 +40,19 @@ io.on('connection', function(socket){
       socket.broadcast.to(storedId).emit('opponent deck', { deck: data.deck });
     });
     socket.on('grab', function(data){
-      socket.broadcast.to(storedId).emit('grab', {storedId});
+      socket.broadcast.to(storedId).emit('grab', data);
     });
     socket.on('select', function(data){
-      socket.broadcast.to(storedId).emit('select');      
+      socket.broadcast.to(storedId).emit('select', data);      
     });
     socket.on('use', function(data){
-      socket.broadcast.to(storedId).emit('use');      
+      socket.broadcast.to(storedId).emit('use', data);      
     });
     socket.on('play', function(data){
-      socket.broadcast.to(storedId).emit('play');      
+      socket.broadcast.to(storedId).emit('play', data);      
     });
     socket.on('drawCard', function(data){
-      socket.broadcast.to(storedId).emit('draw');      
+      socket.broadcast.to(storedId).emit('drawCard', data);      
     });
     socket.on('end', function(data){
       socket.broadcast.to(storedId).emit('end');  
@@ -78,19 +78,19 @@ io.on('connection', function(socket){
       socket.broadcast.to(storedId).emit('opponent deck', { deck: data.deck });
     })
     socket.on('grab', function(data){
-      socket.broadcast.to(storedId).emit('grab', {storedId});
+      socket.broadcast.to(storedId).emit('grab', data);
     });
     socket.on('select', function(data){
-      socket.broadcast.to(storedId).emit('select');      
+      socket.broadcast.to(storedId).emit('select', data);      
     });
     socket.on('use', function(data){
-      socket.broadcast.to(storedId).emit('use');      
+      socket.broadcast.to(storedId).emit('use', data);      
     });
     socket.on('play', function(data){
-      socket.broadcast.to(storedId).emit('play');      
+      socket.broadcast.to(storedId).emit('play', data);      
     });
     socket.on('drawCard', function(data){
-      socket.broadcast.to(storedId).emit('draw');      
+      socket.broadcast.to(storedId).emit('drawCard', data);      
     });
     socket.on('end', function(data){
       socket.broadcast.to(storedId).emit('end');  

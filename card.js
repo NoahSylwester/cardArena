@@ -103,7 +103,6 @@ const draw = function(radians) {
   if (radians !== undefined && this.grabbed === false) {
     c.translate(this.x+this.sprite.width/2,this.y+this.sprite.height/2);
     c.rotate(radians);
-    console.log(this.sprite);
     c.drawImage(this.sprite.img, -this.sprite.width/2, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12, this.sprite.width, this.sprite.height);
     if (this.sprite.img !== cardBack) {
       // write atk and def if face-up
@@ -286,10 +285,10 @@ window.addEventListener('orientationchange', function() {
 // define functions to use
 // socket event functions
 function grab() {
-  socket.emit('grab', { grabbedCard: grabbedCard});
+  socket.emit('grab', { grabbedCard: currentGrabbedCard});
 }
 function select() {
-  socket.emit('select', { selectedCard: selectedCard});
+  socket.emit('select', { selectedCard: currentSelectedCard});
 }
 function use() {
   socket.emit('use', { usedCard: usedCard, hand: playerHand, deck: playerDeck, field: playerField, enemyHand: enemyHand, enemyField: enemyField});
@@ -525,6 +524,7 @@ function clickDeck(array) {
         // draw card into hand, render as face-up
         array[array.length-1].cardSprite.sprite.img = cardFront;
         playerHand.push(array.pop());
+        drawCard();
       }
       // bug fix for doubleclick
       isDeckClicked = true;
@@ -537,6 +537,7 @@ function mouseDownIteration(array) {
         
         array[i].cardSprite.grabbed = true;
         currentGrabbedCard = array[i];
+        grab();
 
         // bug fix
         array[i].cardSprite.x = cursor.x - array[i].cardSprite.sprite.width/2;
@@ -590,6 +591,7 @@ function mouseUpIteration(array) {
           }
         }
       }
+      play();
     }
     // forget what's been grabbed
     currentGrabbedCard = undefined;
@@ -629,11 +631,13 @@ function executeActionOnSelectedCard() {
   for (let i = 0; i < enemyField.length; i++) {
     if (enemyField[i].cardSprite.selected) {
       currentSelectedCard = enemyField[i];
+      select();
     }
   }
   for (let i = 0; i < playerField.length; i++) {
     if (playerField[i].cardSprite.selected) {
       currentSelectedCard = playerField[i];
+      select();
     }
   }
   if (currentSelectedCard !== undefined && typeof currentGrabbedCard.cardSprite.ability === "function") {
@@ -953,9 +957,11 @@ socket.on('opponent deck', function(data) {
 });
 socket.on('grab', function (data) {
   // assign grabbed card to be data.grabbedCard
+  console.log('grab', data);
 });
 socket.on('select', function (data) {
   // assign grabbed card to be data.selectedCard
+  console.log('select', data);
 });
 socket.on('use', function (data) {
   // data.usedCard
@@ -966,16 +972,22 @@ socket.on('use', function (data) {
   // playerField = data.enemyField
 });
 socket.on('play', function (data) {
-  // enemyHand = data.hand
-  // enemyField = data.field
-  // enemyDeck = data.deck
+  enemyHand = data.hand
+  enemyField = data.field
+  enemyDeck = data.deck
+  parseCards(enemyHand, cardBack);
+  parseCards(enemyDeck, cardBack);
+  parseCards(enemyField, cardFront);
   // hand: playerHand
   // deck: playerDeck
   // field: playerField
+  console.log('play', data);
 });
 socket.on('drawCard', function (data) {
-  // enemyHand = data.hand
-  // enemyDeck = data.deck
+  enemyHand = data.hand;
+  enemyDeck = data.deck;
+  parseCards(enemyHand, cardBack);
+  parseCards(enemyDeck, cardBack);
 });
 socket.on('end', function (data) {
 
