@@ -153,6 +153,15 @@ const draw = function(radians) {
     }
   }
 }
+const parseCards = function(array, img) {
+  for (let i = 0; i < array.length; i++) {
+    // adds canvas functions
+    array[i].cardSprite.draw = draw;
+    array[i].cardSprite.update = update;
+    // adds img data
+    array[i].cardSprite.sprite.img = img;
+  };
+}
 
 // arrays of cards
 var arrayOfPlayerCards = [];
@@ -940,12 +949,7 @@ socket.on('initialize deck', function(data) {
 });
 socket.on('opponent deck', function(data) {
   enemyDeck = data.deck;
-  for (let i = 0; i < enemyDeck.length; i++) {
-    enemyDeck[i].cardSprite.draw = draw;
-    enemyDeck[i].cardSprite.update = update;
-    enemyDeck[i].cardSprite.sprite.img = cardBack;
-  };
-  console.log(enemyDeck);
+  parseCards(enemyDeck, cardBack);
 });
 socket.on('grab', function (data) {
   // assign grabbed card to be data.grabbedCard
