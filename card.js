@@ -3,8 +3,10 @@ still to do:
 use card event
 show card on use
 offer opportunity to use ability
+WORKING ON BUTTONS LINE 919
 
-cost implementation
+
+cost implementation CHECK
 
 server tests for wins/loses
 */
@@ -274,6 +276,8 @@ var enemyDeckX = canvas.width * (1/20);
 var enemyZone = canvas.height * 1/8;
 // buttons
 var buttonArray = [];
+// menu buttons
+var menuButtons = [];
 
 // max hand size
 const maxHandSize = 7;
@@ -290,6 +294,7 @@ var currentGrabbedIndex;
 var grabSizeMultiplier = 10/9;
 var zoomedCard;
 var enemyUsedCard;
+var battleMenuFlag = true;
 
 // bug fix to prevent doubleclick from zooming on second card drawn from deck quickly
 var isDeckClicked = false;
@@ -461,8 +466,8 @@ function Button(text, img, id, x, y, func) {
     text: text,
 
     sprite: {
-      width: width/10,
-      height: (width/20) * (1/2)
+      width: canvas.width/10,
+      height: (canvas.width/20) * (1/2)
     },
   
     draw: function() {
@@ -483,14 +488,18 @@ function Button(text, img, id, x, y, func) {
       }
     },
     
-    update: function() {
+    update: function(isMenu) {
       let width = canvas.width;
       this.sprite.width = width/10;
       this.sprite.height = (width/10) * (1/2);
 
-      this.x = width*17/20;
-
-      this.draw();
+      if (isMenu === true) {
+        this.draw();
+      }
+      else {
+        this.x = width*17/20;
+        this.draw();
+      }
     }
   };
 };
@@ -803,8 +812,19 @@ var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, functio
 // var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50, function() {console.log('Attack')});
 // var abilityButton = new Button("Ability",0,0, canvas.width*3/4, canvas.height/2 + 50, function() {console.log('Ability')});
 
+// text, img, id, x, y, func
+var attackButton = new Button("Attack", 0,0, 0,0, function() {
+  console.log('attack');
+});
+var abilityButton = new Button("Ability", 0,0, 0,0, function() {
+  console.log('ability');
+});
+var cancelButton = new Button("Cancel", 0,0, 0,0, function() {
+  console.log('cancel');
+});
 
 buttonArray.push(endButton);//, attackButton, abilityButton);
+menuButtons.push(cancelButton, attackButton, abilityButton);
 
 // final animation loop function
 function animate() {
@@ -901,6 +921,23 @@ function animate() {
     let radians = ((handArcAngle) * (i + 0.5)/playerHand.length)-(handArcAngle/2);
     playerHand[i].cardSprite.y = (playerHandY -  playerHand[i].cardSprite.sprite.height);
     playerHand[i].cardSprite.update(radians);
+  }
+  // bring up attack/ability confirm
+  if (battleMenuFlag) {
+    c.fillStyle = "#cccccc";
+    let menuWidth = canvas.width/3;
+    let menuHeight = 100;
+    let menuX = canvas.width * 1/3;
+    let menuY = (canvas.height - menuHeight)/2;
+    c.fillRect(menuX, menuY, menuWidth, menuHeight);
+    c.fillStyle = "#000000";
+    c.fillText('Select an action', menuX + menuWidth * 21/100, menuY + 25, canvas.width/3);
+    // let buttonSpacing = 0;canvas.height/40;
+    for (let i = 0; i < menuButtons.length; i++) {
+      menuButtons[i].buttonSprite.x = menuX + menuWidth/3 * i + 3;
+      menuButtons[i].buttonSprite.y = menuY + menuHeight * 1/2;
+      menuButtons[i].buttonSprite.update(isMenu = true);
+    }
   }
   // render zoomed card
   if (zoomedCard !== undefined) {
