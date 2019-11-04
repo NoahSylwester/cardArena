@@ -92,7 +92,7 @@ const update = function(radians) {
   }
 }
 const draw = function(radians) {
-  // handle different length numbers for atk and def, to be used in drawing text
+  // handle different length numbers for atk and def and cost, to be used in drawing text
   let atkTextAdjust;
   if (this.atk.toString().length > 1) {
     atkTextAdjust = this.sprite.width * 1/50;
@@ -107,6 +107,13 @@ const draw = function(radians) {
   else {
     defTextAdjust = this.sprite.width * 1/19;
   }
+  let costTextAdjust;
+  if (this.cost.toString().length > 1) {
+    costTextAdjust = this.sprite.width * 1/50;
+  }
+  else {
+    costTextAdjust = this.sprite.width * 1/19;
+  }
   // check if radian input given card and not grabbed, rotate if so
   if (radians !== undefined && this.grabbed === false) {
     c.translate(this.x+this.sprite.width/2,this.y+this.sprite.height/2);
@@ -117,6 +124,10 @@ const draw = function(radians) {
       c.fillStyle = "#cccccc";
       c.font = `${(this.sprite.height/8)}px Monaco`;
       
+      // write name
+      c.fillText(this.name, -this.sprite.width/2 + this.sprite.width * 2/19, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12 + this.sprite.height * 123/184, this.sprite.width/2);
+      // write cost
+      c.fillText(this.cost, -this.sprite.width/2 + costTextAdjust, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12 + this.sprite.height * 4/31, this.sprite.width/6);
       // write atk
       c.fillText(this.atk, -this.sprite.width/2 + atkTextAdjust, -this.sprite.height/2 + (Math.abs(radians)+1)**3 * 12 + this.sprite.height * 27/28, this.sprite.width/6);
       // write def
@@ -139,6 +150,10 @@ const draw = function(radians) {
       c.fillStyle = "#cccccc";
       c.font = `${(this.sprite.height/8)}px Monaco`;
   
+      // write name
+      c.fillText(this.name, this.x + this.sprite.width * 2/19, this.y + this.sprite.height * 123/184, this.sprite.width/2);
+      // write cost
+      c.fillText(this.cost, this.x + costTextAdjust, this.y + this.sprite.height * 4/31, this.sprite.width/6);
       // write atk
       c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
       // write def
@@ -159,6 +174,10 @@ const draw = function(radians) {
       c.fillStyle = "#cccccc";
       c.font = `${(this.sprite.height/8)}px Monaco`;
   
+      // write name
+      c.fillText(this.name, this.x + this.sprite.width * 2/19, this.y + this.sprite.height * 123/184, this.sprite.width/2);
+      // write cost
+      c.fillText(this.cost, this.x + costTextAdjust, this.y + this.sprite.height * 4/31, this.sprite.width/6);
       // write atk
       c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
       // write def
@@ -179,6 +198,10 @@ const draw = function(radians) {
       c.fillStyle = "#cccccc";
       c.font = `${(this.sprite.height/8)}px Monaco`;
   
+      // write name
+      c.fillText(this.name, this.x + this.sprite.width * 2/19, this.y + this.sprite.height * 123/184, this.sprite.width/2);
+      // write cost
+      c.fillText(this.cost, this.x + costTextAdjust, this.y + this.sprite.height * 4/31, this.sprite.width/6);
       // write atk
       c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
       // write def
@@ -193,6 +216,10 @@ const draw = function(radians) {
       c.fillStyle = "#cccccc";
       c.font = `${(this.sprite.height/8)}px Monaco`;
   
+      // write name
+      c.fillText(this.name, this.x + this.sprite.width * 2/19, this.y + this.sprite.height * 123/184, this.sprite.width/2);
+      // write cost
+      c.fillText(this.cost, this.x + costTextAdjust, this.y + this.sprite.height * 4/31, this.sprite.width/6);
       // write atk
       c.fillText(this.atk, this.x + atkTextAdjust, this.y + this.sprite.height * 27/28, this.sprite.width/6);
       // write def
@@ -232,6 +259,7 @@ var enemyFieldY = canvas.height * (6/20);
 var enemyHandY = -12;//canvas.height * (1/20);
 var enemyDeckY = canvas.height * (1/20);
 var enemyDeckX = canvas.width * (1/20);
+var enemyZone = canvas.height * 1/4;
 // buttons
 var buttonArray = [];
 
@@ -319,6 +347,7 @@ window.addEventListener('resize', function() {
   enemyHandY = -12;
   enemyDeckY = canvas.height * (1/20);
   enemyDeckX = canvas.width * (1/20);
+  enemyZone = canvas.height * 1/4;
 });
 window.addEventListener('orientationchange', function() {
   canvas.width = window.innerWidth;
@@ -331,6 +360,7 @@ window.addEventListener('orientationchange', function() {
   enemyHandY = -100;
   enemyDeckY = canvas.height * (1/20);
   enemyDeckX = canvas.width * (1/20);
+  enemyZone = canvas.height * 1/4;
 });
 
 // define functions to use
@@ -364,18 +394,19 @@ function end() {
 }
 // player stat object
 function Player() {
-  this.hp = 10;
+  this.hp = 25;
   this.mana = 0;
-  this.isMyTurn = false;
-  this.deck = [];
+  this.draws = 7;
 };
 
 // card constructor
-function Card(img, atk, def, ability) {
+function Card(img, atk, def, ability, cost = 0, name = "Monster") {
   // everything is within this cardSprite object
   this.cardSprite = {
     // initialize easy-to-verify id
     id: ++cardId,
+    name: name,
+    cost: cost,
     effects: [],
     atk: atk,
     def: def,
@@ -687,62 +718,56 @@ canvas.addEventListener('touchend', function(event) {
   mouseUpIteration(playerDeck);
 });
 
+// create players
+
+var player = new Player();
+var opponent = new Player();
 
 // create some cards
-// arrayOfPlayerCards.push(new Card(cardFront,0,0,0));
-// arrayOfPlayerCards.push(new Card(cardFront,1,0,0));
-// arrayOfPlayerCards.push(new Card(cardFront,2,0,0));
-// arrayOfPlayerCards.push(new Card(cardFront,3,0,0));
-// arrayOfPlayerCards.push(new Card(cardFront,4,0,0));
 
-// playerHand.push(new Card(cardFront,0,0,0));
-// playerHand.push(new Card(cardBack,0,0,0));
-// playerHand.push(new Card(cardFront,0,0,0));
-// playerHand.push(new Card(cardFront,0,0,0));
-// playerHand.push(new Card(cardBack,0,0,0));
-// playerHand.push(new Card(cardFront,0,0,0));
-// playerHand.push(new Card(cardFront,0,0,0));
+// make a deck
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
+playerDeck.push(new Card(cardBack,0,0,0));
 
-// enemyHand.push(new Card(cardFront,0,0,0));
-// enemyHand.push(new Card(cardFront,0,0,0));
-// enemyHand.push(new Card(cardFront,0,0,0));
-// enemyHand.push(new Card(cardFront,0,0,0));
-// enemyHand.push(new Card(cardFront,0,0,0));
-// enemyHand.push(new Card(cardFront,0,0,0));
-// enemyHand.push(new Card(cardFront,0,0,0));
-
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-
-// enemyDeck.push(new Card(cardBack,0,0,0));
-// enemyDeck.push(new Card(cardBack,0,0,0));
-// enemyDeck.push(new Card(cardBack,0,0,0));
-// enemyDeck.push(new Card(cardBack,0,0,0));
-// enemyDeck.push(new Card(cardBack,0,0,0));
-// enemyDeck.push(new Card(cardBack,0,0,0));
-// enemyDeck.push(new Card(cardBack,0,0,0));
-// enemyDeck.push(new Card(cardBack,0,0,0));
-// enemyDeck.push(new Card(cardBack,0,0,0));
-// enemyDeck.push(new Card(cardBack,0,0,0));
-
-// enemyField.push(new Card(cardBack,0,0,0));
-// enemyField.push(new Card(cardBack,0,0,0));
-// enemyField.push(new Card(cardBack,0,0,0));
-// enemyField.push(new Card(cardBack,0,0,0));
-// playerField.push(new Card(cardBack,0,0,function(card) {alert('ability!')}));
+playerField.push(new Card(cardFront,0,0,function(card) {alert('ability!')}));
 
 var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, function() {end()});
 // var attackButton = new Button("Attack",0,0, canvas.width*3/4, canvas.height/2 - 50, function() {console.log('Attack')});
@@ -790,7 +815,7 @@ function animate() {
   // enemy deck
   for (let i = 0; i < enemyDeck.length; i++) {
     enemyDeck[i].cardSprite.x = enemyDeckX;
-    enemyDeck[i].cardSprite.y = enemyDeckY - i;
+    enemyDeck[i].cardSprite.y = enemyDeckY - i/2;
     enemyDeck[i].cardSprite.update();
   }
   // render buttons
@@ -802,7 +827,7 @@ function animate() {
   // animate player deck
   for (let i = 0; i < playerDeck.length; i++) {
     playerDeck[i].cardSprite.x = playerDeckX - canvas.width/10;
-    playerDeck[i].cardSprite.y = playerHandY - playerDeck[i].cardSprite.sprite.height - i; // thicken deck with more cards
+    playerDeck[i].cardSprite.y = playerHandY - playerDeck[i].cardSprite.sprite.height - i/2; // thicken deck with more cards
     playerDeck[i].cardSprite.update();
   }
   // animate player field
@@ -866,10 +891,21 @@ function animate() {
       else {
         defTextAdjust = zoomWidth * 1/19;
       }
+      let costTextAdjust;
+      if (zoomedCard.cardSprite.cost.toString().length > 1) {
+        costTextAdjust = zoomWidth * 1/50;
+      }
+      else {
+        costTextAdjust = zoomWidth * 1/19;
+      }
       // write atk and def if face-up
       c.fillStyle = "#cccccc";
       c.font = `${(zoomHeight/8)}px Monaco`;
   
+      // write name
+      c.fillText(zoomedCard.cardSprite.name, x + zoomWidth * 2/19, y + zoomHeight * 123/184, zoomWidth/2);
+      // write cost
+      c.fillText(zoomedCard.cardSprite.cost, x + costTextAdjust, y + zoomHeight * 4/31, zoomWidth/6);
       // write atk
       c.fillText(zoomedCard.cardSprite.atk, x + atkTextAdjust, y + zoomHeight * 27/28, zoomWidth/6);
       // write def
