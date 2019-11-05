@@ -980,6 +980,7 @@ var attackButton = new Button("Attack", 0,0, 0,0, function() {
 var abilityButton = new Button("Ability", 0,0, 0,0, function() {
   // used card ability
   if (typeof usedCard.cardSprite.ability === "function") {
+    // requires cost to be paid on ability usage
     if (usedCard.cardSprite.cost <= player.mana) {
       if (opponentHighlight) {
         usedCard.cardSprite.ability(targetedCard);
