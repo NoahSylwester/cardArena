@@ -3,8 +3,9 @@ still to do:
 use card event
 show card on use
 offer opportunity to use ability
-WORKING ON BUTTONS LINE 919
 
+
+make draws and playing cards deplete mana
 
 cost implementation CHECK
 
@@ -296,6 +297,9 @@ var zoomedCard;
 var enemyUsedCard;
 // indicates when to open battle menu
 var isBattleMenuOpen = false;
+// stores selection of highlighted player when menu opens
+var playerHighlight = false;
+var opponentHighlight = false;
 // stores used card
 var usedCard;
 // stores targeted card
@@ -394,17 +398,23 @@ function grab(boolean) {
     socket.emit('grab', { grabbedCard: currentGrabbedCard});
   }
   else {
-    socket.emit('release');
+    // keep cards selected until menu is closed
+    if (isBattleMenuOpen === false) {
+      socket.emit('release');
+    }
   }
 }
 function select(cardSprite) {
   socket.emit('select', { selectedCardSprite: cardSprite});
 }
 function unselect() {
-  socket.emit('unselect');
+  // keep cards selected until menu is closed
+  if (isBattleMenuOpen === false) {
+    socket.emit('unselect');
+  }
 }
 function use() {
-  socket.emit('use', { usedCard: usedCard, hand: playerHand, deck: playerDeck, field: playerField, enemyHand: enemyHand, enemyField: enemyField});
+  socket.emit('use', { usedCard: usedCard, targetedCard: targetedCard, hand: playerHand, deck: playerDeck, field: playerField, enemyHand: enemyHand, enemyField: enemyField});
 }
 function play() {
   socket.emit('play', { hand: playerHand, deck: playerDeck, field: playerField});
@@ -416,6 +426,12 @@ function end() {
   isPlayerTurn = false;
   socket.emit('end');
 }
+function win() {
+ socket.emit('win');
+}
+function lose() {
+  socket.emit('lose');
+ }
 // player stat object
 function Player() {
   this.hp = 25;
@@ -673,6 +689,12 @@ function executeActionOnSelectedCard() {
   }
   // execute any abilities on selected players
   else {
+    if (player.selected) {
+      playerHighlight = true;
+    }
+    else if (opponent.selected) {
+      opponentHighlight = true;
+    }
     usedCard = currentGrabbedCard;
     isBattleMenuOpen = true;
   }
@@ -848,37 +870,92 @@ var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, functio
 // text, img, id, x, y, func
 var attackButton = new Button("Attack", 0,0, 0,0, function() {
   // attack a card or player
-  if (opponent.selected) {
+  if (opponentHighlight) {
     opponent.hp -= usedCard.cardSprite.atk;
+    // check for win
+    if (opponent.hp >= 0) {
+      win();
+    }
   }
-  else if (player.selected) {
+  else if (playerHighlight) {
     player.hp -= usedCard.cardSprite.atk;
+    // check for win
+    if (player.hp >= 0) {
+      lose();
+    }
   }
   else if (targetedCard !== undefined) {
     targetedCard.cardSprite.def -= usedCard.cardSprite.atk;
+    if (targetedCard.cardSprite.def <= 0) {
+      for (let i = 0; i < enemyField.length; i++) {
+        if (targetedCard.cardSprite.id === enemyField[i].cardSprite.id) {
+          enemyField.splice(i, 1);
+          break;
+        }
+      }
+      for (let i = 0; i < playerField.length; i++) {
+        if (targetedCard.cardSprite.id === playerField[i].cardSprite.id) {
+          playerField.splice(i, 1);
+          break;
+        }
+      }
+    }
   }
+  use();
   isBattleMenuOpen = false;
+  // unhighlight cards on other board
+  unselect();
+  grab(false);
+  playerHighlight = false;
+  opponentHighlight = false;
+  usedCard = undefined;
+  targetedCard = undefined;
   console.log('attack');
 });
 var abilityButton = new Button("Ability", 0,0, 0,0, function() {
   // used card ability
   if (typeof usedCard.cardSprite.ability === "function") {
-    if (opponent.selected) {
+    if (opponentHighlight) {
       usedCard.cardSprite.ability(targetedCard);
     }
-    else if (player.selected) {
+    else if (playerHighlight) {
       usedCard.cardSprite.ability(targetedCard);
     }
     else if (targetedCard !== undefined) {
       usedCard.cardSprite.ability(targetedCard);
     }
-    isBattleMenuOpen = false;
+    use();
+    // check for win
+    if (opponent.hp >= 0) {
+      win();
+    }
+    if (player.hp >= 0) {
+      lose();
+    }
   }
+  else {
+    alert('No ability');
+  }
+  playerHighlight = false;
+  opponentHighlight = false;
+  isBattleMenuOpen = false;
+  // unhighlight cards on other board
+  unselect();
+  grab(false);
+  usedCard = undefined;
+  targetedCard = undefined;
   console.log('ability');
 });
 var cancelButton = new Button("Cancel", 0,0, 0,0, function() {
   console.log('cancel');
+  playerHighlight = false;
+  opponentHighlight = false;
+  usedCard = undefined;
+  targetedCard = undefined;
   isBattleMenuOpen = false;
+  // unhighlight cards on other board
+  unselect();
+  grab(false);
 });
 
 buttonArray.push(endButton);//, attackButton, abilityButton);
@@ -902,11 +979,11 @@ function animate() {
   c.stroke();
 
   // animate any player targeting
-  if (opponent.selected) {
+  if (opponent.selected || opponentHighlight) {
     c.fillStyle = "#143a0c75";
     c.fillRect(0, 0, canvas.width, canvas.height/8);
   }
-  else if (player.selected) {
+  else if (player.selected || playerHighlight) {
     c.fillStyle = "#143a0c75";
     c.fillRect(0, canvas.height * 7/8, canvas.width, canvas.height/8);
   }
@@ -1159,6 +1236,12 @@ socket.on('upkeep', function(data) {
   opponent.hp = data.hp;
   opponent.mana = data.mana;
   opponent.draws = data.draws;
+});
+socket.on('win', function() {
+  alert('You win!');
+});
+socket.on('lose', function() {
+  alert('You lose!');
 })
 socket.on('end', function (data) {
   isPlayerTurn = true;

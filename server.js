@@ -67,6 +67,14 @@ io.on('connection', function(socket){
       socket.broadcast.to(storedId).emit('end'); 
       console.log('end turn');
     });
+    socket.on('win', function() {
+      socket.broadcast.to(storedId).emit('lose');
+      socket.emit('win');
+    })
+    socket.on('lose', function() {
+      socket.broadcast.to(storedId).emit('win');
+      socket.emit('lose');
+    })
     socket.on('disconnect', function() {
       io.to(storedId).emit('disconnected');
       console.log('disconnected ' + storedId);
@@ -117,6 +125,14 @@ io.on('connection', function(socket){
       socket.broadcast.to(storedId).emit('end');
       console.log('end turn');
     });
+    socket.on('win', function() {
+      socket.broadcast.to(storedId).emit('lose');
+      socket.emit('win');
+    })
+    socket.on('lose', function() {
+      socket.broadcast.to(storedId).emit('win');
+      socket.emit('lose');
+    })
     socket.on('disconnect', function() {
       io.to(storedId).emit('disconnected');
       console.log('disconnected ' + storedId);
