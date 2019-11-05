@@ -15,7 +15,7 @@ server tests for wins/loses
 var cardId = Math.random();
 
 // player turn boolean (false until changed by the server)
-var isPlayerTurn = true;
+var isPlayerTurn = false;
 
 // define canvas
 var canvas = document.querySelector('canvas');
@@ -294,7 +294,8 @@ var currentGrabbedIndex;
 var grabSizeMultiplier = 10/9;
 var zoomedCard;
 var enemyUsedCard;
-var isBattleMenuOpen = true;
+// indicates when to open battle menu
+var isBattleMenuOpen = false;
 
 // bug fix to prevent doubleclick from zooming on second card drawn from deck quickly
 var isDeckClicked = false;
@@ -714,7 +715,9 @@ canvas.addEventListener('mousemove', function(event) {
 });
 canvas.addEventListener('click', function(event) {
   if (zoomedCard === undefined && isPlayerTurn) {
-    clickDeck(playerDeck);
+    if (isBattleMenuOpen === false) {
+      clickDeck(playerDeck);
+    }
   }
   else {
     // escape zoom
@@ -725,11 +728,13 @@ canvas.addEventListener('mousedown', function(event) {
   if (isPlayerTurn) {
     if (zoomedCard === undefined) {
       checkForButtonPush();
-      mouseDownIteration(arrayOfPlayerCards);
-      if (currentGrabbedIndex === undefined) {
-        mouseDownIteration(playerHand);
+      if (isBattleMenuOpen === false) {
+        // mouseDownIteration(arrayOfPlayerCards);
         if (currentGrabbedIndex === undefined) {
-          mouseDownIteration(playerField);
+          mouseDownIteration(playerHand);
+          if (currentGrabbedIndex === undefined) {
+            mouseDownIteration(playerField);
+          }
         }
       }
     }
