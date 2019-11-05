@@ -4,9 +4,10 @@ use card event CHECK
 
 offer opportunity to use ability CHECK
 
+display player health and mana and draws
 show card on use
 make draws and playing cards deplete mana
-indicate when it is player's turn
+indicate when it is player's turn CHECK
 
 cost implementation CHECK
 
@@ -418,10 +419,10 @@ function use() {
   socket.emit('use', { usedCard: usedCard, targetedCard: targetedCard, hand: playerHand, deck: playerDeck, field: playerField, enemyHand: enemyHand, enemyField: enemyField});
 }
 function play() {
-  socket.emit('play', { hand: playerHand, deck: playerDeck, field: playerField});
+  socket.emit('play', { mana: player.mana, hand: playerHand, deck: playerDeck, field: playerField});
 }
 function drawCard() {
-  socket.emit('drawCard', { hand: playerHand, deck: playerDeck});
+  socket.emit('drawCard', { draw: player.draws, hand: playerHand, deck: playerDeck});
 }
 function end() {
   isPlayerTurn = false;
@@ -536,6 +537,7 @@ function clickDeck(array) {
         // draw card into hand, render as face-up
         array[array.length-1].cardSprite.sprite.img = cardFront;
         playerHand.push(array.pop());
+        player.draws --;
         drawCard();
       }
       // bug fix for doubleclick
@@ -582,6 +584,8 @@ function mouseUpIteration(array) {
       // check if anything selected, if dragged card is from hand, if few enough cards in field, and if dragged to field area
     if (!checkIfAnySelectedCards() && array === playerHand && playerField.length < maxFieldSize && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 < playerFieldY && array[currentGrabbedIndex].cardSprite.y + array[currentGrabbedIndex].cardSprite.sprite.height/2 >= canvas.height/2) {
       if (array[currentGrabbedIndex].cardSprite.cost <= player.mana) {
+        // reduce mana
+        player.mana -= array[currentGrabbedIndex].cardSprite.cost;
         var temp = array[currentGrabbedIndex];
         array.splice(currentGrabbedIndex,1);
         // insert cards onto field in location specified by player
@@ -860,6 +864,66 @@ playerDeck.push(new Card(cardBack,1,1,function(card) {
 playerDeck.push(new Card(cardBack,1,1,function(card) {
   card.cardSprite.name = "Dummy";
 },1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
 
 
 playerField.push(new Card(cardFront,0,0,function(card) {alert('ability!')}));
@@ -982,7 +1046,7 @@ function animate() {
   // create player turn indicators
   // player indicator
   c.beginPath();
-  c.arc(playerDeckX - canvas.width/20, playerHandY - ((canvas.width/10) * (2000/1422)) * 1.5, 10, 0, 2 * Math.PI);
+  c.arc(playerDeckX - canvas.width/20, playerHandY - ((canvas.width/10) * (2000/1422)) * 1.75, 10, 0, 2 * Math.PI);
   if (isPlayerTurn) {
     c.fillStyle = '#008000c5';
   }
@@ -995,7 +1059,7 @@ function animate() {
   c.stroke();
   // enemy indicator
   c.beginPath();
-  c.arc(enemyDeckX + canvas.width/20, ((canvas.width/10) * (2000/1422)) * 1.7, 10, 0, 2 * Math.PI);
+  c.arc(enemyDeckX + canvas.width/20, ((canvas.width/10) * (2000/1422)) * 1.9, 10, 0, 2 * Math.PI);
   if (!isPlayerTurn) {
     c.fillStyle = '#008000c5';
   }
@@ -1004,8 +1068,26 @@ function animate() {
   }
   c.fill();
   c.lineWidth = 1;
-  c.strokeStyle = 'black';
+  c.strokeStyle = '#cccccc';
   c.stroke();
+
+
+  // display hp, mana, and draws for each player
+  // player text
+  c.fillStyle = "#cccccc";
+  c.font = `${(canvas.width/50)}px Monaco`;
+  let playerTextY = playerHandY - playerHandY * 1/30;
+  c.fillText(`Draws: ${player.draws}`, playerDeckX - canvas.width/10, playerTextY - (canvas.width/10) * (2000/1422), canvas.width/10);
+  c.fillText(`Mana: ${player.mana}`, playerDeckX - canvas.width/10, playerTextY - (canvas.width/10) * (2000/1422) - (canvas.width/50), canvas.width/10);
+  c.fillText(`HP: ${player.hp}`, playerDeckX - canvas.width/10, playerTextY - (canvas.width/10) * (2000/1422) - (canvas.width/50) * 2, canvas.width/10);
+  // enemy text
+  //c.arc(enemyDeckX + canvas.width/20, ((canvas.width/10) * (2000/1422)) * 1.7, 10, 0, 2 * Math.PI);
+  c.fillStyle = "black";
+  c.font = `${(canvas.width/50)}px Monaco`;
+  c.fillText(`HP: ${opponent.hp}`, enemyDeckX, ((canvas.width/10) * (2000/1422)) * 1.45, canvas.width/10);
+  c.fillText(`Mana: ${opponent.mana}`, enemyDeckX, ((canvas.width/10) * (2000/1422)) * 1.45 + (canvas.width/50), canvas.width/10);
+  c.fillText(`Draws: ${opponent.draws}`, enemyDeckX, ((canvas.width/10) * (2000/1422)) * 1.45 + (canvas.width/50) * 2, canvas.width/10);
+
 
   // animate any player targeting
   if (opponent.selected || opponentHighlight) {
@@ -1248,14 +1330,16 @@ socket.on('use', function (data) {
   parseCards(playerField, cardFront);
 });
 socket.on('play', function (data) {
-  enemyHand = data.hand
-  enemyField = data.field
-  enemyDeck = data.deck
+  opponent.mana = data.mana;
+  enemyHand = data.hand;
+  enemyField = data.field;
+  enemyDeck = data.deck;
   parseCards(enemyHand, cardBack);
   parseCards(enemyDeck, cardBack);
   parseCards(enemyField, cardFront);
 });
 socket.on('drawCard', function (data) {
+  opponent.draws = data.draws;
   enemyHand = data.hand;
   enemyDeck = data.deck;
   parseCards(enemyHand, cardBack);
@@ -1275,7 +1359,10 @@ socket.on('lose', function() {
 socket.on('end', function (data) {
   isPlayerTurn = true;
   player.mana ++;
-  player.draws ++;
+  // limit draws to a maximum of 10
+  if (player.draws < 10) {
+    player.draws ++;
+  }
   socket.emit('upkeep', { hp: player.hp, mana: player.mana, draws: player.draws })
 });
 
