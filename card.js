@@ -1053,8 +1053,9 @@ menuButtons.push(cancelButton, attackButton, abilityButton);
 
 // final animation loop function
 function animate() {
-  
-  requestAnimationFrame(animate);
+  if (!gameEnd) {
+    requestAnimationFrame(animate);
+  }
 
 
   c.clearRect(0, 0, innerWidth, 2 * innerHeight);
@@ -1385,10 +1386,12 @@ socket.on('upkeep', function(data) {
 });
 socket.on('win', function() {
   alert('You win!');
+  gameEnd = true;
 });
 socket.on('lose', function() {
   alert('You lose!');
-})
+  gameEnd = true;
+});
 socket.on('end', function (data) {
   isPlayerTurn = true;
   // limit mana to a maximum of 10
