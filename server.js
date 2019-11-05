@@ -20,12 +20,6 @@ var roomId;
 var count = 0;
 
 io.on('connection', function(socket){
-  let player1Deck;
-  let player1Hand;
-  let player1Field;
-  let player2Deck;
-  let player2Hand;
-  let player2Field;
   
   if (roomId === undefined || count === 0) {
     roomId = uuidv1();

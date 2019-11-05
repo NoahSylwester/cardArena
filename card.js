@@ -4,12 +4,17 @@ show card on use
 make draws and playing cards deplete mana
 
 */
+// end game
+var gameEnd = false;
 
 // initialize random card id value
 var cardId = Math.random();
 
 // player turn boolean (false until changed by the server)
 var isPlayerTurn = false;
+
+// monsters that have attacked
+var monstersThatCantAttackIds = [];
 
 // define canvas
 var canvas = document.querySelector('canvas');
@@ -407,13 +412,13 @@ function unselect() {
   }
 }
 function use() {
-  socket.emit('use', { usedCard: usedCard, targetedCard: targetedCard, hand: playerHand, deck: playerDeck, field: playerField, enemyHand: enemyHand, enemyField: enemyField});
+  socket.emit('use', { mana: player.mana, hp: player.hp, enemyHp: opponent.hp, enemyMana: opponent.mana, usedCard: usedCard, targetedCard: targetedCard, hand: playerHand, deck: playerDeck, field: playerField, enemyHand: enemyHand, enemyField: enemyField});
 }
 function play() {
   socket.emit('play', { mana: player.mana, hand: playerHand, deck: playerDeck, field: playerField});
 }
 function drawCard() {
-  socket.emit('drawCard', { draw: player.draws, hand: playerHand, deck: playerDeck});
+  socket.emit('drawCard', { draws: player.draws, hand: playerHand, deck: playerDeck});
 }
 function end() {
   isPlayerTurn = false;
@@ -581,6 +586,8 @@ function mouseUpIteration(array) {
         var temp = array[currentGrabbedIndex];
         // flag that card has been played
         temp.cardSprite.onField = true;
+
+        monstersThatCantAttackIds.push(temp.cardSprite.id);
         array.splice(currentGrabbedIndex,1);
         // insert cards onto field in location specified by player
         if (playerField.length === 0) {
@@ -930,39 +937,44 @@ var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, functio
 var attackButton = new Button("Attack", 0,0, 0,0, function() {
   // attack a card or player
   if (usedCard.cardSprite.onField === true) {
-    if (opponentHighlight) {
-      opponent.hp -= usedCard.cardSprite.atk;
-      // check for win
-      if (opponent.hp >= 0) {
-        win();
-      }
-    }
-    else if (playerHighlight) {
-      player.hp -= usedCard.cardSprite.atk;
-      // check for win
-      if (player.hp >= 0) {
-        lose();
-      }
-    }
-    else if (targetedCard !== undefined) {
-      targetedCard.cardSprite.def -= usedCard.cardSprite.atk;
-      if (targetedCard.cardSprite.def <= 0) {
-        for (let i = 0; i < enemyField.length; i++) {
-          if (targetedCard.cardSprite.id === enemyField[i].cardSprite.id) {
-            enemyField.splice(i, 1);
-            break;
-          }
-        }
-        for (let i = 0; i < playerField.length; i++) {
-          if (targetedCard.cardSprite.id === playerField[i].cardSprite.id) {
-            playerField.splice(i, 1);
-            break;
-          }
+    if (!monstersThatCantAttackIds.includes(usedCard.cardSprite.id)) {
+      if (opponentHighlight) {
+        opponent.hp -= usedCard.cardSprite.atk;
+        // check for win
+        if (opponent.hp <= 0) {
+          win();
         }
       }
+      else if (playerHighlight) {
+        player.hp -= usedCard.cardSprite.atk;
+        // check for win
+        if (player.hp >= 0) {
+          lose();
+        }
+      }
+      else if (targetedCard !== undefined) {
+        targetedCard.cardSprite.def -= usedCard.cardSprite.atk;
+        if (targetedCard.cardSprite.def <= 0) {
+          for (let i = 0; i < enemyField.length; i++) {
+            if (targetedCard.cardSprite.id === enemyField[i].cardSprite.id) {
+              enemyField.splice(i, 1);
+              break;
+            }
+          }
+          for (let i = 0; i < playerField.length; i++) {
+            if (targetedCard.cardSprite.id === playerField[i].cardSprite.id) {
+              playerField.splice(i, 1);
+              break;
+            }
+          }
+        }
+      }
+    monstersThatCantAttackIds.push(usedCard.cardSprite.id);
+    use();
     }
-
-  use();
+    else {
+      alert('That monster has already been used this turn');
+    }
   }
   else {
     alert('Card must be played first');
@@ -980,28 +992,35 @@ var attackButton = new Button("Attack", 0,0, 0,0, function() {
 var abilityButton = new Button("Ability", 0,0, 0,0, function() {
   // used card ability
   if (typeof usedCard.cardSprite.ability === "function") {
-    // requires cost to be paid on ability usage
-    if (usedCard.cardSprite.cost <= player.mana) {
-      if (opponentHighlight) {
-        usedCard.cardSprite.ability(targetedCard);
+    if (!monstersThatCantAttackIds.includes(usedCard.cardSprite.id)) {
+      // requires cost to be paid on ability usage
+      if (usedCard.cardSprite.cost <= player.mana) {
+        player.mana -= usedCard.cardSprite.cost;
+        if (opponentHighlight) {
+          usedCard.cardSprite.ability(targetedCard);
+        }
+        else if (playerHighlight) {
+          usedCard.cardSprite.ability(targetedCard);
+        }
+        else if (targetedCard !== undefined) {
+          usedCard.cardSprite.ability(targetedCard);
+        }
+        monstersThatCantAttackIds.push(usedCard.cardSprite.id);
+        use();
+        // check for win
+        if (opponent.hp <= 0) {
+          win();
+        }
+        if (player.hp <= 0) {
+          lose();
+        }
       }
-      else if (playerHighlight) {
-        usedCard.cardSprite.ability(targetedCard);
-      }
-      else if (targetedCard !== undefined) {
-        usedCard.cardSprite.ability(targetedCard);
-      }
-      use();
-      // check for win
-      if (opponent.hp >= 0) {
-        win();
-      }
-      if (player.hp >= 0) {
-        lose();
+      else {
+        alert('Not enough mana!');
       }
     }
     else {
-      alert('Not enough mana!');
+      alert('That monster has already been used this turn');
     }
   }
   else {
@@ -1319,6 +1338,11 @@ socket.on('unselect', function () {
   }
 });
 socket.on('use', function (data) {
+  // mana: player.mana, hp: player.mana, enemyHp: opponent.hp, enemyMana: opponent.mana
+  opponent.mana = data.mana;
+  opponent.hp = data.hp;
+  player.hp = data.enemyHp;
+  player.mana = data.enemyMana;
   enemyUsedCard = data.usedCard;
   enemyUsedCard.cardSprite.update = update;
   enemyUsedCard.cardSprite.draw = draw;
@@ -1345,6 +1369,7 @@ socket.on('play', function (data) {
   parseCards(enemyField, cardFront);
 });
 socket.on('drawCard', function (data) {
+  console.log(data.draws);
   opponent.draws = data.draws;
   enemyHand = data.hand;
   enemyDeck = data.deck;
@@ -1355,6 +1380,8 @@ socket.on('upkeep', function(data) {
   opponent.hp = data.hp;
   opponent.mana = data.mana;
   opponent.draws = data.draws;
+  // reset monster cooldowns
+  monstersThatCantAttackIds = [];
 });
 socket.on('win', function() {
   alert('You win!');
@@ -1371,4 +1398,3 @@ socket.on('end', function (data) {
   player.draws ++;
   socket.emit('upkeep', { hp: player.hp, mana: player.mana, draws: player.draws })
 });
-
