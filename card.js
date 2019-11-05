@@ -1364,11 +1364,11 @@ socket.on('lose', function() {
 })
 socket.on('end', function (data) {
   isPlayerTurn = true;
-  player.mana ++;
-  // limit draws to a maximum of 10
-  if (player.draws < 10) {
-    player.draws ++;
+  // limit mana to a maximum of 10
+  if (player.mana < 10) {
+    player.mana ++;
   }
+  player.draws ++;
   socket.emit('upkeep', { hp: player.hp, mana: player.mana, draws: player.draws })
 });
 
