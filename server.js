@@ -60,6 +60,9 @@ io.on('connection', function(socket){
     socket.on('drawCard', function(data){
       socket.broadcast.to(storedId).emit('drawCard', data);      
     });
+    socket.on('upkeep', function(data){
+      socket.broadcast.to(storedId).emit('upkeep', data); 
+    });
     socket.on('end', function(data){
       socket.broadcast.to(storedId).emit('end'); 
       console.log('end turn');
@@ -106,6 +109,9 @@ io.on('connection', function(socket){
     });
     socket.on('drawCard', function(data){
       socket.broadcast.to(storedId).emit('drawCard', data);      
+    });
+    socket.on('upkeep', function(data){
+      socket.broadcast.to(storedId).emit('upkeep', data); 
     });
     socket.on('end', function(data){
       socket.broadcast.to(storedId).emit('end');

@@ -296,6 +296,10 @@ var zoomedCard;
 var enemyUsedCard;
 // indicates when to open battle menu
 var isBattleMenuOpen = false;
+// stores used card
+var usedCard;
+// stores targeted card
+var targetedCard;
 
 // bug fix to prevent doubleclick from zooming on second card drawn from deck quickly
 var isDeckClicked = false;
@@ -648,20 +652,29 @@ function releaseAnyPushedButton() {
   }
 }
 function executeActionOnSelectedCard() {
-  // use grabbed card's ability on selected card
-  let currentSelectedCard;
-  for (let i = 0; i < enemyField.length; i++) {
-    if (enemyField[i].cardSprite.selected) {
-      currentSelectedCard = enemyField[i];
+  // use grabbed card's ability on selected card or player
+  if (!player.selected && !opponent.selected) {
+    let currentSelectedCard;
+    for (let i = 0; i < enemyField.length; i++) {
+      if (enemyField[i].cardSprite.selected) {
+        currentSelectedCard = enemyField[i];
+      }
+    }
+    for (let i = 0; i < playerField.length; i++) {
+      if (playerField[i].cardSprite.selected) {
+        currentSelectedCard = playerField[i];
+      }
+    }
+    if (currentSelectedCard !== undefined) {
+      usedCard = currentGrabbedCard;
+      targetedCard = currentSelectedCard;
+      isBattleMenuOpen = true;
     }
   }
-  for (let i = 0; i < playerField.length; i++) {
-    if (playerField[i].cardSprite.selected) {
-      currentSelectedCard = playerField[i];
-    }
-  }
-  if (currentSelectedCard !== undefined && typeof currentGrabbedCard.cardSprite.ability === "function") {
-    currentGrabbedCard.cardSprite.ability(currentSelectedCard);
+  // execute any abilities on selected players
+  else {
+    usedCard = currentGrabbedCard;
+    isBattleMenuOpen = true;
   }
 }
 function checkCardCoordinatesOfArray(array) {
@@ -791,46 +804,40 @@ var opponent = new Player();
 // create some cards
 
 // make a deck
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0,1));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0));
-playerDeck.push(new Card(cardBack,0,0,0,1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+playerDeck.push(new Card(cardBack,1,1,function(card) {
+  card.cardSprite.name = "Dummy";
+},1));
+
 
 playerField.push(new Card(cardFront,0,0,function(card) {alert('ability!')}));
 
@@ -840,13 +847,38 @@ var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, functio
 
 // text, img, id, x, y, func
 var attackButton = new Button("Attack", 0,0, 0,0, function() {
+  // attack a card or player
+  if (opponent.selected) {
+    opponent.hp -= usedCard.cardSprite.atk;
+  }
+  else if (player.selected) {
+    player.hp -= usedCard.cardSprite.atk;
+  }
+  else if (targetedCard !== undefined) {
+    targetedCard.cardSprite.def -= usedCard.cardSprite.atk;
+  }
+  isBattleMenuOpen = false;
   console.log('attack');
 });
 var abilityButton = new Button("Ability", 0,0, 0,0, function() {
+  // used card ability
+  if (typeof usedCard.cardSprite.ability === "function") {
+    if (opponent.selected) {
+      usedCard.cardSprite.ability(targetedCard);
+    }
+    else if (player.selected) {
+      usedCard.cardSprite.ability(targetedCard);
+    }
+    else if (targetedCard !== undefined) {
+      usedCard.cardSprite.ability(targetedCard);
+    }
+    isBattleMenuOpen = false;
+  }
   console.log('ability');
 });
 var cancelButton = new Button("Cancel", 0,0, 0,0, function() {
   console.log('cancel');
+  isBattleMenuOpen = false;
 });
 
 buttonArray.push(endButton);//, attackButton, abilityButton);
@@ -1123,7 +1155,15 @@ socket.on('drawCard', function (data) {
   parseCards(enemyHand, cardBack);
   parseCards(enemyDeck, cardBack);
 });
+socket.on('upkeep', function(data) {
+  opponent.hp = data.hp;
+  opponent.mana = data.mana;
+  opponent.draws = data.draws;
+})
 socket.on('end', function (data) {
   isPlayerTurn = true;
+  player.mana ++;
+  player.draws ++;
+  socket.emit('upkeep', { hp: player.hp, mana: player.mana, draws: player.draws })
 });
 
