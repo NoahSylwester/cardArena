@@ -1,17 +1,8 @@
 /*
 still to do:
-use card event CHECK
-
-offer opportunity to use ability CHECK
-
-display player health and mana and draws
 show card on use
 make draws and playing cards deplete mana
-indicate when it is player's turn CHECK
 
-cost implementation CHECK
-
-server tests for wins/loses CHECK
 */
 
 // initialize random card id value
@@ -438,7 +429,7 @@ function lose() {
 function Player() {
   this.hp = 25;
   this.mana = 0;
-  this.draws = 7;
+  this.draws = 6;
   this.selected = false;
 };
 
@@ -463,6 +454,7 @@ function Card(img, atk, def, ability, cost = 0, name = "Monster") {
     selected: false,
     enemyGrabbed: false,
     enemySelected: false,
+    onField: false,
 
     sprite: {
       img: img,
@@ -587,6 +579,8 @@ function mouseUpIteration(array) {
         // reduce mana
         player.mana -= array[currentGrabbedIndex].cardSprite.cost;
         var temp = array[currentGrabbedIndex];
+        // flag that card has been played
+        temp.cardSprite.onField = true;
         array.splice(currentGrabbedIndex,1);
         // insert cards onto field in location specified by player
         if (playerField.length === 0) {
@@ -935,38 +929,44 @@ var endButton = new Button("End",0,0, canvas.width*3/4, canvas.height/2, functio
 // text, img, id, x, y, func
 var attackButton = new Button("Attack", 0,0, 0,0, function() {
   // attack a card or player
-  if (opponentHighlight) {
-    opponent.hp -= usedCard.cardSprite.atk;
-    // check for win
-    if (opponent.hp >= 0) {
-      win();
-    }
-  }
-  else if (playerHighlight) {
-    player.hp -= usedCard.cardSprite.atk;
-    // check for win
-    if (player.hp >= 0) {
-      lose();
-    }
-  }
-  else if (targetedCard !== undefined) {
-    targetedCard.cardSprite.def -= usedCard.cardSprite.atk;
-    if (targetedCard.cardSprite.def <= 0) {
-      for (let i = 0; i < enemyField.length; i++) {
-        if (targetedCard.cardSprite.id === enemyField[i].cardSprite.id) {
-          enemyField.splice(i, 1);
-          break;
-        }
-      }
-      for (let i = 0; i < playerField.length; i++) {
-        if (targetedCard.cardSprite.id === playerField[i].cardSprite.id) {
-          playerField.splice(i, 1);
-          break;
-        }
+  if (usedCard.cardSprite.onField === true) {
+    if (opponentHighlight) {
+      opponent.hp -= usedCard.cardSprite.atk;
+      // check for win
+      if (opponent.hp >= 0) {
+        win();
       }
     }
-  }
+    else if (playerHighlight) {
+      player.hp -= usedCard.cardSprite.atk;
+      // check for win
+      if (player.hp >= 0) {
+        lose();
+      }
+    }
+    else if (targetedCard !== undefined) {
+      targetedCard.cardSprite.def -= usedCard.cardSprite.atk;
+      if (targetedCard.cardSprite.def <= 0) {
+        for (let i = 0; i < enemyField.length; i++) {
+          if (targetedCard.cardSprite.id === enemyField[i].cardSprite.id) {
+            enemyField.splice(i, 1);
+            break;
+          }
+        }
+        for (let i = 0; i < playerField.length; i++) {
+          if (targetedCard.cardSprite.id === playerField[i].cardSprite.id) {
+            playerField.splice(i, 1);
+            break;
+          }
+        }
+      }
+    }
+
   use();
+  }
+  else {
+    alert('Card must be played first');
+  }
   isBattleMenuOpen = false;
   // unhighlight cards on other board
   unselect();
@@ -980,22 +980,27 @@ var attackButton = new Button("Attack", 0,0, 0,0, function() {
 var abilityButton = new Button("Ability", 0,0, 0,0, function() {
   // used card ability
   if (typeof usedCard.cardSprite.ability === "function") {
-    if (opponentHighlight) {
-      usedCard.cardSprite.ability(targetedCard);
+    if (usedCard.cardSprite.cost <= player.mana) {
+      if (opponentHighlight) {
+        usedCard.cardSprite.ability(targetedCard);
+      }
+      else if (playerHighlight) {
+        usedCard.cardSprite.ability(targetedCard);
+      }
+      else if (targetedCard !== undefined) {
+        usedCard.cardSprite.ability(targetedCard);
+      }
+      use();
+      // check for win
+      if (opponent.hp >= 0) {
+        win();
+      }
+      if (player.hp >= 0) {
+        lose();
+      }
     }
-    else if (playerHighlight) {
-      usedCard.cardSprite.ability(targetedCard);
-    }
-    else if (targetedCard !== undefined) {
-      usedCard.cardSprite.ability(targetedCard);
-    }
-    use();
-    // check for win
-    if (opponent.hp >= 0) {
-      win();
-    }
-    if (player.hp >= 0) {
-      lose();
+    else {
+      alert('Not enough mana!');
     }
   }
   else {
