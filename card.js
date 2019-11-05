@@ -1,15 +1,16 @@
 /*
 still to do:
-use card event
+use card event CHECK
+
+offer opportunity to use ability CHECK
+
 show card on use
-offer opportunity to use ability
-
-
 make draws and playing cards deplete mana
+indicate when it is player's turn
 
 cost implementation CHECK
 
-server tests for wins/loses
+server tests for wins/loses CHECK
 */
 
 // initialize random card id value
@@ -976,6 +977,34 @@ function animate() {
   c.lineTo(canvas.width, canvas.height/2);
   // Make the line visible
   c.strokeStyle = '#cccccc';
+  c.stroke();
+
+  // create player turn indicators
+  // player indicator
+  c.beginPath();
+  c.arc(playerDeckX - canvas.width/20, playerHandY - ((canvas.width/10) * (2000/1422)) * 1.5, 10, 0, 2 * Math.PI);
+  if (isPlayerTurn) {
+    c.fillStyle = '#008000c5';
+  }
+  else {
+    c.fillStyle = '#ff0000c5';
+  }
+  c.fill();
+  c.lineWidth = 1;
+  c.strokeStyle = '#cccccc';
+  c.stroke();
+  // enemy indicator
+  c.beginPath();
+  c.arc(enemyDeckX + canvas.width/20, ((canvas.width/10) * (2000/1422)) * 1.7, 10, 0, 2 * Math.PI);
+  if (!isPlayerTurn) {
+    c.fillStyle = '#008000c5';
+  }
+  else {
+    c.fillStyle = '#ff0000c5';
+  }
+  c.fill();
+  c.lineWidth = 1;
+  c.strokeStyle = 'black';
   c.stroke();
 
   // animate any player targeting
